@@ -1,0 +1,49 @@
+import { NextResponse } from "next/server";
+import { Resend } from "resend"; // Ou ton service d'email actuel
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export async function POST(req: Request) {
+  try {
+    const { email, customerName, orderNumber, type } = await req.json();
+
+    let subject = "";
+    let htmlContent = "";
+
+    if (type === "RE-PREP") {
+      subject = `Mise à jour de votre commande #${orderNumber}`;
+      htmlContent = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 20px;">
+          <h2 style="font-style: italic; font-weight: 900; text-transform: uppercase;">Renw.</h2>
+          <p>Bonjour ${customerName},</p>
+          <p>Notre équipe technique effectue actuellement une <strong>vérification supplémentaire</strong> sur votre produit #${orderNumber} pour garantir une qualité parfaite.</p>
+          <p>Votre colis sera expédié très prochainement. Merci de votre patience.</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="font-size: 10px; color: #aaa; text-transform: uppercase; font-weight: bold;">L'équipe logistique Renw</p>
+        </div>
+      `;
+    } else if (type === "CANCEL") {
+      subject = `Annulation de votre commande #${orderNumber}`;
+      htmlContent = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 20px; background-color: #fff5f5;">
+          <h2 style="font-style: italic; font-weight: 900; text-transform: uppercase; color: #e53e3e;">Renw.</h2>
+          <p>Bonjour ${customerName},</p>
+          <p>Nous vous informons que votre commande <strong>#${orderNumber}</strong> a été annulée.</p>
+          <p>Si vous avez déjà été débité, un remboursement sera visible sur votre compte sous 3 à 5 jours ouvrés.</p>
+          <p>Nous nous excusons pour ce désagrément.</p>
+        </div>
+      `;
+    }
+
+    await resend.emails.send({
+      from: "Renw <sav@tondomaine.com>",
+      to: email,
+      subject: subject,
+      html: htmlContent,
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: "Email failed" }, { status: 500 });
+  }
+}

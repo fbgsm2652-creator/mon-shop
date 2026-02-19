@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #111111;
+  --color-accent: #2563eb;
+  --color-footer: #fafafa;
+}
+
+/* 1. CONFIGURATION DE BASE */
+html {
+  background-color: #ffffff;
+  color: #111111;
+  color-scheme: light;
+  /* CORRECTION ICI : scroll-behavior au lieu de scroll-smooth */
+  scroll-behavior: smooth; 
+}
+
+body {
+  background-color: #ffffff;
+  color: #111111;
+  /* Lissage de police Premium */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  text-rendering: optimizeLegibility;
+  margin: 0;
+}
+
+/* 2. FORCE LE MODE CLAIR */
+@media (prefers-color-scheme: dark) {
+  html, body {
+    background-color: #ffffff !important;
+    color: #111111 !important;
+  }
+}
+
+/* 3. PERSONNALISATION DE LA SÉLECTION (Look RENW) */
+::selection {
+  background-color: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+}
+
+/* 4. SCROLLBAR MINIMALISTE */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
