@@ -9,8 +9,6 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [customerData, setCustomerData] = useState<any>(null);
-  
-  // Plus besoin de dépendre du localStorage pour le total final, on le calcule en direct.
 
   const siteFont = { fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" };
 
@@ -26,7 +24,6 @@ export default function PaymentPage() {
   // --- CALCUL SÉCURISÉ EN DIRECT ---
   // 1. Calcul du sous-total des articles (en prenant en compte la quantité si elle existe)
   const itemsSubtotal = cart.items.reduce((total, item) => {
-    // Si tu gères les quantités (item.quantity), remplace `1` par `item.quantity`
     return total + (Number(item.price) * (item.quantity || 1));
   }, 0);
 
@@ -144,10 +141,12 @@ export default function PaymentPage() {
                     {(item.capacity || item.grade) && (
                         <p className="text-[9px] text-blue-600 font-bold uppercase">{item.capacity} {item.capacity && item.grade && '|'} {item.grade}</p>
                     )}
-                    {/* Affichage de la quantité si elle est > 1 */}
-                    {item.quantity > 1 && (
-                        <p className="text-[10px] text-gray-500 font-medium">Qté: {item.quantity}</p>
+                    
+                    {/* CORRECTION TYPESCRIPT ICI */}
+                    {(item.quantity || 1) > 1 && (
+                        <p className="text-[10px] text-gray-500 font-medium">Qté: {item.quantity || 1}</p>
                     )}
+
                   </div>
                   <p className="text-[14px] font-bold">{(Number(item.price) * (item.quantity || 1)).toFixed(2)}€</p>
                 </div>
