@@ -2,12 +2,15 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 const isProtectedRoute = createRouteMatcher([
   '/mon-compte(.*)',
-  '/dashboard-preparation(.*)', // <--- AJOUTÉ ICI POUR SÉCURISER TON QG
+  '/dashboard-preparation(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    await auth.protect();
+  const { userId } = await auth();
+
+  if (!userId && isProtectedRoute(req)) {
+    // Si l'utilisateur n'est pas connecté et essaie d'accéder à une route protégée
+    return (await auth()).redirectToSignIn();
   }
 });
 
