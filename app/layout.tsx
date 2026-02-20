@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
@@ -9,9 +11,8 @@ import { client } from "@/sanity/lib/client";
 import Script from "next/script"; 
 import { headers } from "next/headers";
 
-// --- 1. RÉCUPÉRATION DES DONNÉES (HIÉRARCHIE DYNAMIQUE) ---
+// --- 1. RÉCUPÉRATION DES DONNÉES ---
 async function getNavigationData() {
-  // Correction de la requête : On s'assure de récupérer le slug même pour les enfants
   const query = `{
     "categories": *[_type == "category" && !defined(parent)] | order(title asc) {
       _id, 
@@ -35,7 +36,7 @@ async function getNavigationData() {
   return await client.fetch(query, {}, { next: { revalidate: 60 } });
 }
 
-// --- 2. SEO DYNAMIQUE CORRIGÉ ---
+// --- 2. SEO DYNAMIQUE ---
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await client.fetch(`*[_type == "settings"][0]`);
   const home = await client.fetch(`*[_type == "homeSettings"][0]`);
@@ -43,7 +44,6 @@ export async function generateMetadata(): Promise<Metadata> {
   const companyName = settings?.companyName || "RENW";
   const siteUrl = settings?.baseUrl || "https://renw.fr";
   
-  // On évite les erreurs de chaînage sur home.seo
   const title = home?.metaTitle || `${companyName} | Expertise Tech & Pièces Certifiées`;
   const description = home?.metaDescription || "Spécialiste de la pièce détachée et de l'iPhone reconditionné.";
 
@@ -64,7 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: companyName,
       locale: "fr_FR",
       type: "website",
-      images: [{ url: "/default-og.png" }], // Image par défaut si Sanity est vide
+      images: [{ url: "/default-og.png" }],
     },
   };
 }
@@ -86,7 +86,6 @@ export default async function RootLayout({
   const pathname = headerList.get("x-invoke-path") || "";
   const isStudio = pathname.startsWith("/studio");
 
-  // Une seule grosse requête pour tout le layout (Plus rapide)
   const { categories, headerSettings, home } = await getNavigationData();
 
   return (
@@ -103,7 +102,6 @@ export default async function RootLayout({
             />
           )}
 
-          {/* Injection sécurisée des données */}
           {!isStudio && (
             <Header 
               categories={categories || []} 
@@ -111,7 +109,6 @@ export default async function RootLayout({
             />
           )}
           
-          {/* Le paddingTop est crucial pour ne pas cacher le contenu sous le Header fixe */}
           <main className={!isStudio ? "pt-[140px] md:pt-[180px]" : ""}>
             {children}
           </main>
