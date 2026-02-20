@@ -11,7 +11,7 @@ import { client } from "@/sanity/lib/client";
 import Script from "next/script"; 
 import { headers } from "next/headers";
 
-// --- 1. RÉCUPÉRATION DES DONNÉES ---
+// --- 1. RÉCUPÉRATION DES DONNÉES (HIÉRARCHIE DYNAMIQUE) ---
 async function getNavigationData() {
   const query = `{
     "categories": *[_type == "category" && !defined(parent)] | order(title asc) {
