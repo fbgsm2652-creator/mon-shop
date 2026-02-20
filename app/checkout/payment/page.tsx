@@ -9,27 +9,38 @@ export default function PaymentPage() {
   const [loading, setLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [customerData, setCustomerData] = useState<any>(null);
-  const [totalFinal, setTotalFinal] = useState(0);
+  
+  // Plus besoin de dépendre du localStorage pour le total final, on le calcule en direct.
 
   const siteFont = { fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" };
 
   useEffect(() => {
     setIsMounted(true);
-    // Récupération des données sauvegardées à l'étape Shipping
     const savedCustomer = localStorage.getItem("customer-info");
     if (savedCustomer) {
       const data = JSON.parse(savedCustomer);
       setCustomerData(data);
-      // On récupère le total calculé (Articles + Frais de port)
-      setTotalFinal(data.totalAmount);
     }
   }, []);
+
+  // --- CALCUL SÉCURISÉ EN DIRECT ---
+  // 1. Calcul du sous-total des articles (en prenant en compte la quantité si elle existe)
+  const itemsSubtotal = cart.items.reduce((total, item) => {
+    // Si tu gères les quantités (item.quantity), remplace `1` par `item.quantity`
+    return total + (Number(item.price) * (item.quantity || 1));
+  }, 0);
+
+  // 2. Récupération sécurisée du prix de la livraison (par défaut 0 si non trouvé)
+  const shippingPrice = customerData?.shippingPrice ? Number(customerData.shippingPrice) : 0;
+
+  // 3. Le VRAI total final
+  const totalFinal = itemsSubtotal + shippingPrice;
 
   if (!isMounted) return null;
 
   const handleZenPayment = async () => {
     if (!customerData || totalFinal <= 0) {
-      alert("Informations de commande incomplètes. Veuillez recommencer l'étape de livraison.");
+      alert("Informations de commande incomplètes ou panier vide. Veuillez recommencer l'étape de livraison.");
       return;
     }
 
@@ -41,7 +52,7 @@ export default function PaymentPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: cart.items,
-          total: totalFinal, // On envoie le montant exact avec livraison
+          total: totalFinal, // On envoie le montant calculé et vérifié
           customer: customerData
         })
       });
@@ -49,7 +60,6 @@ export default function PaymentPage() {
       const data = await response.json();
 
       if (data.redirectUrl) {
-        // Redirection vers ZEN (Apple Pay, CB, etc.)
         window.location.href = data.redirectUrl;
       } else {
         alert("Erreur ZEN : " + (data.error || "Impossible d'initier la transaction"));
@@ -80,17 +90,17 @@ export default function PaymentPage() {
 
             <div className="bg-[#F5F5F7] p-8 rounded-[2.5rem] mb-10 border border-gray-100">
                <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-2">Montant total à régler</p>
-               <p className="text-5xl font-black text-blue-600 tracking-tighter">{totalFinal}€</p>
+               <p className="text-5xl font-black text-blue-600 tracking-tighter">{totalFinal.toFixed(2)}€</p>
                <p className="text-[11px] text-gray-500 mt-4 font-medium italic">
-                  Livraison {customerData?.shippingName} incluse ({customerData?.shippingPrice}€)
+                  Livraison {customerData?.shippingName || "Standard"} incluse ({shippingPrice.toFixed(2)}€)
                </p>
             </div>
 
             <div className="space-y-4">
                <button 
                   onClick={handleZenPayment}
-                  disabled={loading}
-                  className={`w-full bg-[#111111] text-white py-6 rounded-full font-bold uppercase tracking-[0.2em] text-[12px] transition-all shadow-xl active:scale-95 ${loading ? 'opacity-50' : 'hover:bg-blue-600'}`}
+                  disabled={loading || totalFinal <= 0}
+                  className={`w-full bg-[#111111] text-white py-6 rounded-full font-bold uppercase tracking-[0.2em] text-[12px] transition-all shadow-xl active:scale-95 ${loading || totalFinal <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}
                >
                   {loading ? "Connexion à ZEN.com..." : "Confirmer et Payer"}
                </button>
@@ -104,8 +114,8 @@ export default function PaymentPage() {
             </div>
 
             <p className="mt-12 text-[10px] text-gray-400 uppercase tracking-widest leading-loose">
-               Votre commande sera expédiée en <span className="text-[#111111] font-bold">{customerData?.country}</span><br/>
-               via {customerData?.shippingName} dès validation du paiement.
+               Votre commande sera expédiée en <span className="text-[#111111] font-bold">{customerData?.country || "France"}</span><br/>
+               via {customerData?.shippingName || "votre transporteur"} dès validation du paiement.
             </p>
           </div>
         </div>
@@ -121,13 +131,25 @@ export default function PaymentPage() {
               {cart.items.map((item) => (
                 <div key={item._id} className="flex gap-6 items-center">
                   <div className="h-16 w-16 bg-white rounded-xl p-2 border border-gray-100 shrink-0">
-                    <img src={urlFor(item.images[0]).url()} className="h-full w-full object-contain" alt="" />
+                    {/* Sécurité : Vérifie que l'image existe avant d'essayer de l'afficher */}
+                    {item.images && item.images[0] ? (
+                      <img src={urlFor(item.images[0]).url()} className="h-full w-full object-contain" alt={item.name} />
+                    ) : (
+                      <div className="h-full w-full bg-gray-100 rounded-md"></div>
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="text-[12px] font-bold uppercase truncate">{item.name}</p>
-                    <p className="text-[9px] text-blue-600 font-bold uppercase">{item.capacity} | {item.grade}</p>
+                    {/* Affichage conditionnel de la capacité et du grade si ce sont des téléphones */}
+                    {(item.capacity || item.grade) && (
+                        <p className="text-[9px] text-blue-600 font-bold uppercase">{item.capacity} {item.capacity && item.grade && '|'} {item.grade}</p>
+                    )}
+                    {/* Affichage de la quantité si elle est > 1 */}
+                    {item.quantity > 1 && (
+                        <p className="text-[10px] text-gray-500 font-medium">Qté: {item.quantity}</p>
+                    )}
                   </div>
-                  <p className="text-[14px] font-bold">{item.price}€</p>
+                  <p className="text-[14px] font-bold">{(Number(item.price) * (item.quantity || 1)).toFixed(2)}€</p>
                 </div>
               ))}
             </div>
@@ -135,11 +157,11 @@ export default function PaymentPage() {
             <div className="space-y-3 pt-6 border-t border-gray-200">
                <div className="flex justify-between text-[13px] text-gray-500">
                   <span>Articles</span>
-                  <span>{totalFinal - (customerData?.shippingPrice || 0)}€</span>
+                  <span>{itemsSubtotal.toFixed(2)}€</span>
                </div>
                <div className="flex justify-between text-[13px] text-gray-500">
-                  <span>Livraison ({customerData?.shippingName})</span>
-                  <span className="text-blue-600 font-bold">{customerData?.shippingPrice === 0 ? "OFFERTE" : `${customerData?.shippingPrice}€`}</span>
+                  <span>Livraison ({customerData?.shippingName || "Standard"})</span>
+                  <span className="text-blue-600 font-bold">{shippingPrice === 0 ? "OFFERTE" : `${shippingPrice.toFixed(2)}€`}</span>
                </div>
             </div>
           </div>
