@@ -25,6 +25,9 @@ export default async function HomePage() {
   return (
     <main className="bg-white text-[#111111] font-sans antialiased overflow-x-hidden">
       
+      {/* NOUVEAU : H1 CACHÉ POUR LE SEO (Lu en premier par les robots) */}
+      <h1 className="sr-only">RENW France : Smartphones Reconditionnés et Pièces Détachées Certifiées</h1>
+
       {/* 1. HERO SLIDER - SEO: LCP Optimization */}
       <section className="w-full" aria-label="Offre promotionnelle">
         <div className="relative h-[65vh] w-full overflow-hidden">
@@ -62,15 +65,15 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* 3. BENTO GRID - SEO: Sémantique H2 */}
+      {/* 3. BENTO GRID - SEO: Sémantique */}
       <section className="max-w-7xl mx-auto px-6 mt-16" aria-label="Nos catégories de produits">
-        <h2 className="sr-only">Parcourir par catégories</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
           {data?.bentoGrid?.map((item: any, i: number) => (
             <Link key={i} href={item.link || "#"} className={`relative overflow-hidden rounded-[2.5rem] bg-[#F5F5F7] aspect-square group ${i === 0 || i === 3 ? 'md:col-span-2 md:aspect-[21/9]' : ''}`}>
               {item.image && <Image src={urlFor(item.image).url()} alt={item.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" sizes="(max-width: 768px) 50vw, 33vw" />}
               <div className="absolute bottom-8 left-8">
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#111111]">{item.title}</h3>
+                {/* CHANGEMENT SÉMANTIQUE : h3 -> span pour ne pas casser la hiérarchie H1 > H2 */}
+                <span className="block text-[10px] font-black uppercase tracking-[0.3em] text-[#111111]">{item.title}</span>
               </div>
             </Link>
           ))}
@@ -93,11 +96,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 5. BLOC TEXTE SEO - SEO: H1 REPOSITIONNÉ LOGIQUEMENT */}
+      {/* 5. BLOC TEXTE SEO - Transformation en H2 sémantique (Le H1 est maintenant tout en haut) */}
       <section className="max-w-4xl mx-auto px-6 py-20 text-center">
-        <h1 className="text-[22px] md:text-[32px] font-[1000] tracking-tighter uppercase mb-8 leading-tight">
+        <h2 className="text-[22px] md:text-[32px] font-[1000] tracking-tighter uppercase mb-8 leading-tight">
           {data?.seoBlock?.title || "Expertise Tech & Reconditionné Certifié"}
-        </h1>
+        </h2>
         <div className="text-gray-500 leading-loose text-[15px] font-medium whitespace-pre-line px-4 md:px-10">
           {data?.seoBlock?.content}
         </div>
@@ -110,18 +113,19 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* 7. PRODUITS PHARES - SEO: Listes de produits */}
-      <section className="max-w-7xl mx-auto px-6 pb-32" aria-label="Nos meilleures ventes">
-        <h2 className="sr-only">Produits en vedette</h2>
+      {/* 7. PRODUITS PHARES */}
+      <section className="max-w-7xl mx-auto px-6 pb-32" aria-labelledby="featured-products-title">
+        <h2 id="featured-products-title" className="sr-only">Nos produits en vedette</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
           {data?.featuredProducts?.map((product: any) => (
             <article key={product._id}>
-              <Link href={`/produit/${product.slug}`} className="group block text-center">
+              {/* CORRECTION CRITIQUE URL COURTE : "/produit/${product.slug}" devient "/${product.slug}" */}
+              <Link href={`/${product.slug}`} className="group block text-center">
                 <div className="aspect-[4/5] bg-[#F5F5F7] rounded-[2.5rem] overflow-hidden mb-6 flex items-center justify-center p-10 transition-all group-hover:bg-white group-hover:shadow-2xl border border-transparent">
                   {product.imageUrl && (
                     <Image 
                       src={product.imageUrl} 
-                      alt={product.name} 
+                      alt={`Photo de ${product.name}`} 
                       width={280} 
                       height={280} 
                       className="object-contain transition-transform duration-500 group-hover:scale-110" 
@@ -143,22 +147,36 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* SEO MASTER JSON-LD ENRICHI */}
+      {/* SEO MASTER JSON-LD ENRICHI (WebSite + Organization) */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "name": "RENW",
-            "alternateName": "RENW Technology",
-            "url": "https://renw.fr",
-            "potentialAction": {
-              "@type": "SearchAction",
-              "target": "https://renw.fr/search?q={search_term_string}",
-              "query-input": "required name=search_term_string"
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "RENW France",
+              "alternateName": "RENW Technology",
+              "url": "https://renw.fr",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://renw.fr/search?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "RENW",
+              "url": "https://renw.fr",
+              "logo": "https://renw.fr/logo.png", // Mets l'URL exacte de ton logo ici si tu l'as
+              "description": "Expert français en smartphones reconditionnés et pièces détachées de haute qualité.",
+              "address": {
+                "@type": "PostalAddress",
+                "addressCountry": "FR"
+              }
             }
-          })
+          ])
         }}
       />
     </main>

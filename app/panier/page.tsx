@@ -6,11 +6,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 
-// Note: Dans Next.js App Router, les métadonnées pour les pages "use client" 
-// se placent normalement dans un layout.tsx parent ou via un composant de tête.
-// Pour rester simple et efficace ici, on garde la structure sémantique forte.
+// Ce fichier est la version française du panier (route /panier)
+// Il utilise le design Apple Premium avec fond blanc.
 
-export default function CartPage() {
+export default function PanierPage() {
   const [isMounted, setIsMounted] = useState(false);
   const cart = useCart();
 
@@ -40,7 +39,7 @@ export default function CartPage() {
     }
   };
 
-  const siteFont = { fontFamily: "Inter, 'Segoe UI', Roboto, sans-serif" };
+  const siteFont = { fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" };
 
   return (
     <div style={siteFont} className="bg-white min-h-screen pt-12 pb-24 text-[#111111] selection:bg-blue-100 antialiased">
@@ -67,7 +66,7 @@ export default function CartPage() {
                 </Link>
               </div>
             ) : (
-              <section className="space-y-6"> {/* Sémantique : Groupe d'articles */}
+              <section className="space-y-6">
                 {cart.items.map((item) => {
                   const imgUrl = getImageUrl(item.images?.[0]);
                   return (
@@ -114,7 +113,6 @@ export default function CartPage() {
                           <button 
                               onClick={() => onRemove(item._id)} 
                               className="text-[13px] font-bold tracking-tight text-red-500 hover:text-red-700 transition-colors flex items-center gap-2"
-                              aria-label={`Retirer ${item.name} du panier`}
                           >
                             <Trash2 size={16} /> 
                             Retirer
@@ -129,7 +127,7 @@ export default function CartPage() {
           </main>
 
           {/* COLONNE DROITE : RÉSUMÉ */}
-          <aside className="w-full lg:w-[380px] lg:sticky lg:top-24" role="complementary">
+          <aside className="w-full lg:w-[380px] lg:sticky lg:top-24">
             <div className="p-10 bg-[#F5F5F7] rounded-[3rem] border border-gray-100 relative overflow-hidden">
               <h2 className="text-[14px] font-black uppercase tracking-[0.3em] mb-10 text-blue-600">
                 Résumé de commande
@@ -161,12 +159,11 @@ export default function CartPage() {
                   Procéder au paiement
                 </Link>
 
-                {/* LOGOS PAIEMENT : SEO - Ajout de dimensions et ALT */}
                 <div className="mt-10 flex flex-col items-center gap-6">
                     <div className="flex items-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" className="h-3 w-auto" alt="Paiement Visa sécurisé" />
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" className="h-5 w-auto" alt="Paiement PayPal sécurisé" />
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" className="h-5 w-auto" alt="Paiement Mastercard sécurisé" />
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" className="h-3 w-auto" alt="Visa" />
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" className="h-5 w-auto" alt="PayPal" />
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" className="h-5 w-auto" alt="Mastercard" />
                     </div>
                 </div>
               </div>

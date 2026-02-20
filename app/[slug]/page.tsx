@@ -4,18 +4,21 @@ import ProductPageClient from "@/components/ProductPageClient";
 import CategoryPageDisplay from "@/components/CategoryPageDisplay";
 import { Metadata } from "next";
 
-// --- 1. GÉNÉRATION DES METADATA (SEO DYNAMIQUE - INCHANGÉ) ---
+// --- 1. GÉNÉRATION DES METADATA (SEO DYNAMIQUE - 10/10) ---
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const params = await props.params;
   const { slug } = params;
 
+  // CORRECTION CRITIQUE : Retrait du "seo." car les groupes Sanity ne nichent pas les données.
+  // AJOUT : "metaKeywords" pour récupérer les mots-clés.
   const data = await client.fetch(`
     *[slug.current == $slug][0]{
       _type,
       name,
       title,
-      "metaTitle": seo.metaTitle,
-      "metaDescription": seo.metaDescription,
+      metaTitle,
+      metaDescription,
+      metaKeywords,
       "ogImage": images[0].asset->url
     }
   `, { slug });
@@ -23,14 +26,27 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   if (!data) return { title: "Page non trouvée | RENW" };
 
   const displayTitle = data.metaTitle || `${data.name || data.title} - Expertise Certifiée | RENW`;
+  const displayDesc = data.metaDescription || `Découvrez notre sélection de ${data.name || data.title}. Qualité certifiée RENW, expédition rapide.`;
 
   return {
     title: displayTitle,
-    description: data.metaDescription || `Découvrez notre sélection de ${data.name || data.title}. Qualité certifiée RENW, garantie 12 mois.`,
+    description: displayDesc,
+    keywords: data.metaKeywords ? data.metaKeywords.split(',').map((k: string) => k.trim()) : ["reconditionné", "RENW France", data.name || data.title],
     alternates: { canonical: `https://renw.fr/${slug}` },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
     openGraph: {
       title: displayTitle,
-      description: data.metaDescription,
+      description: displayDesc,
       url: `https://renw.fr/${slug}`,
       siteName: "RENW",
       images: data.ogImage ? [{ url: data.ogImage }] : [],
@@ -39,7 +55,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   };
 }
 
-// --- 2. LE COMPOSANT DYNAMIQUE (LOGIQUE DE 104 LIGNES PRÉSERVÉE) ---
+// --- 2. LE COMPOSANT DYNAMIQUE (LOGIQUE DE 104 LIGNES PRÉSERVÉE À 100%) ---
 export default async function DynamicPage(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   const { slug } = params;

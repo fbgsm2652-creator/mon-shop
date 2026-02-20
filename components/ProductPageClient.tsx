@@ -4,25 +4,18 @@ import { PortableText } from "@portabletext/react";
 import useCart from "@/hooks/use-cart";
 import { urlFor } from "@/sanity/lib/image";
 import Link from "next/link";
-import Image from "next/image"; // Import ajouté
+import Image from "next/image";
 import Script from "next/script";
 
-/**
- * META KEYWORDS: {product.metaKeywords}, reconditionné, RENW France, {product.name}
- */
-
-// --- ICÔNES ---
+// --- ICÔNES (Optimisées avec aria-hidden="true" pour le SEO/Accessibilité) ---
 const ShoppingCartIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`mr-2 ${className}`}><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`mr-2 ${className}`}><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
 );
-const ShieldCheck = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-2 opacity-70"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>);
-const TruckIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-2 opacity-70"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>);
-const StarIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-2 opacity-70"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>);
 const PlusIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
 );
 const MinusIcon = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line></svg>
 );
 
 export default function ProductPageClient({ product }: { product: any }) {
@@ -58,7 +51,6 @@ export default function ProductPageClient({ product }: { product: any }) {
     : (product.images?.find((img: any) => img.colorAssoc === currentColor) || product.mainImage);
 
   const siteFont = { fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" };
-  const metaKeywords = `${product.metaKeywords || ""}, reconditionné, RENW France, ${product.name}`;
   
   const structuredData = {
     "@context": "https://schema.org",
@@ -104,28 +96,28 @@ export default function ProductPageClient({ product }: { product: any }) {
       price: unitPrice, 
       grade: variantLabel,
       color: currentColor || "Original",
-      images: [displayImage ? urlFor(displayImage).url() : ""]
+      images: [displayImage ? urlFor(displayImage).url() : ""],
+      quantity: quantity
     });
     setShowModal(true);
   };
 
   return (
     <main style={siteFont} className="bg-white min-h-screen pb-32 md:pb-24 antialiased">
-      <meta name="keywords" content={metaKeywords} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       {product.headerScript && <Script id="product-js" strategy="afterInteractive">{product.headerScript}</Script>}
 
       {/* MODAL & BARRE MOBILE */}
       {showModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" role="dialog">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="modal-title">
           <div className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl text-center border border-gray-100">
             <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <ShoppingCartIcon className="w-8 h-8" />
             </div>
-            <h2 className="text-xl font-bold mb-2">Ajouté au panier !</h2>
+            <h2 id="modal-title" className="text-xl font-bold mb-2">Ajouté au panier !</h2>
             <p className="text-gray-500 text-sm mb-6">Souhaitez-vous finaliser votre commande maintenant ?</p>
             <div className="flex flex-col gap-3">
-              <Link href="/cart" className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold uppercase tracking-widest text-[10px]">Voir mon panier</Link>
+              <Link href="/panier" className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold uppercase tracking-widest text-[10px]">Voir mon panier</Link>
               <button onClick={() => setShowModal(false)} className="w-full bg-gray-100 text-gray-600 py-4 rounded-xl font-bold uppercase tracking-widest text-[10px]">Continuer mes achats</button>
             </div>
           </div>
@@ -139,9 +131,9 @@ export default function ProductPageClient({ product }: { product: any }) {
             <span className="text-[18px] font-black text-blue-600 tracking-tighter leading-none">{totalPrice}€</span>
           </div>
           <div className="flex items-center bg-gray-100 rounded-xl h-[50px] px-1 shrink-0">
-              <button aria-label="Moins" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-7 h-7 flex items-center justify-center text-gray-500"><MinusIcon /></button>
+              <button aria-label="Réduire la quantité" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-7 h-7 flex items-center justify-center text-gray-500"><MinusIcon /></button>
               <span className="w-5 text-center font-bold text-[12px]">{quantity}</span>
-              <button aria-label="Plus" onClick={() => setQuantity(quantity + 1)} className="w-7 h-7 flex items-center justify-center text-gray-500"><PlusIcon /></button>
+              <button aria-label="Augmenter la quantité" onClick={() => setQuantity(quantity + 1)} className="w-7 h-7 flex items-center justify-center text-gray-500"><PlusIcon /></button>
           </div>
           <button onClick={onAddToCart} className="flex-[2.5] bg-[#111111] text-white h-[50px] rounded-xl font-black uppercase tracking-[0.1em] text-[9px] flex items-center justify-center px-1 shadow-lg active:scale-95 transition-transform">
             <ShoppingCartIcon className="w-3 h-3" /> Ajouter au panier
@@ -153,17 +145,17 @@ export default function ProductPageClient({ product }: { product: any }) {
         
         {/* FIL D'ARIANE */}
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 mb-6 text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400">
-          <Link href="/" className="hover:text-blue-600 transition-colors">Accueil</Link>
+          <Link href="/" className="hover:text-blue-600 transition-colors" title="Retour à l'accueil">Accueil</Link>
           <span className="text-[8px] opacity-30">/</span>
           {product.category && (
             <>
-              <Link href={`/categories/${product.category.slug?.current || ""}`} className="hover:text-blue-600 transition-colors">
+              <Link href={`/categories/${product.category.slug?.current || ""}`} className="hover:text-blue-600 transition-colors" title={`Catégorie ${product.category.title || product.category.name}`}>
                 {product.category.title || product.category.name}
               </Link>
               <span className="text-[8px] opacity-30">/</span>
             </>
           )}
-          <span className="text-gray-900 truncate max-w-[120px]">{product.name}</span>
+          <span className="text-gray-900 truncate max-w-[120px]" aria-current="page">{product.name}</span>
         </nav>
 
         <div className="flex flex-col lg:flex-row gap-3 lg:gap-16 items-start">
@@ -177,7 +169,7 @@ export default function ProductPageClient({ product }: { product: any }) {
                 
                 <div className="flex items-center gap-2 mt-1 px-3 py-0.5 bg-white shadow-sm rounded-full border border-blue-50/50 text-[10px] md:text-[11px] font-bold uppercase tracking-[0.05em] text-blue-600/60">
                   <span>{isReconditioned ? product.grades?.[selectedVariant]?.capacities?.[selectedCap]?.storage : ""}</span>
-                  {isReconditioned && currentColor && <span className="w-1 h-1 bg-gray-200 rounded-full"></span>}
+                  {isReconditioned && currentColor && <span className="w-1 h-1 bg-gray-200 rounded-full" aria-hidden="true"></span>}
                   <span>{currentColor}</span>
                 </div>
               </div>
@@ -187,9 +179,9 @@ export default function ProductPageClient({ product }: { product: any }) {
                 {displayImage && (
                   <Image 
                     src={urlFor(displayImage).url()} 
-                    alt={`${product.name} ${currentColor || ''} reconditionné certifié RENW France`} 
+                    alt={`Photo de ${product.name} ${currentColor || ''} reconditionné certifié RENW France`} 
                     fill
-                    priority={true} // Boost de vitesse LCP
+                    priority={true}
                     className="object-contain p-8 md:p-12"
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
@@ -216,11 +208,16 @@ export default function ProductPageClient({ product }: { product: any }) {
                      <div className="space-y-4 px-2">
                        {product.faq.map((item: any, i: number) => (
                          <div key={i} className="border border-gray-100 rounded-2xl overflow-hidden bg-[#FAFAFA]/50 hover:border-blue-100 transition-colors">
-                           <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between p-6 text-left hover:bg-white transition-all">
+                           <button 
+                             onClick={() => setOpenFaq(openFaq === i ? null : i)} 
+                             className="w-full flex items-center justify-between p-6 text-left hover:bg-white transition-all"
+                             aria-expanded={openFaq === i}
+                             aria-controls={`faq-answer-desktop-${i}`}
+                           >
                              <span className="text-[15px] font-bold text-gray-900">{item.question}</span>
                              <div className={`transition-transform duration-300 ${openFaq === i ? 'rotate-45 text-blue-600' : 'text-gray-400'}`}><PlusIcon /></div>
                            </button>
-                           <div className={`overflow-hidden transition-all duration-300 ${openFaq === i ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'}`}>
+                           <div id={`faq-answer-desktop-${i}`} className={`overflow-hidden transition-all duration-300 ${openFaq === i ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'}`}>
                              <p className="p-6 pt-0 text-[14px] text-gray-500 leading-relaxed">{item.answer}</p>
                            </div>
                          </div>
@@ -238,9 +235,9 @@ export default function ProductPageClient({ product }: { product: any }) {
                   <div className="text-[32px] md:text-[36px] font-medium text-blue-600 tracking-tighter shrink-0">{totalPrice}€</div>
                   <div className="flex items-center gap-1.5 flex-1 justify-end">
                     <div className="flex items-center bg-white border border-gray-200 rounded-xl p-1 shadow-sm h-[52px]">
-                        <button aria-label="Moins" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-600 transition-colors"><MinusIcon /></button>
+                        <button aria-label="Réduire la quantité" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-600 transition-colors"><MinusIcon /></button>
                         <span className="w-6 text-center font-bold text-[13px]">{quantity}</span>
-                        <button aria-label="Plus" onClick={() => setQuantity(quantity + 1)} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-600 transition-colors"><PlusIcon /></button>
+                        <button aria-label="Augmenter la quantité" onClick={() => setQuantity(quantity + 1)} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-600 transition-colors"><PlusIcon /></button>
                     </div>
                     <button onClick={onAddToCart} className="flex-grow max-w-[170px] bg-[#111111] text-white h-[52px] rounded-xl font-bold uppercase tracking-widest text-[10px] hover:bg-blue-600 transition-all shadow-xl flex items-center justify-center active:scale-95">
                       <ShoppingCartIcon /> Ajouter
@@ -310,37 +307,55 @@ export default function ProductPageClient({ product }: { product: any }) {
                 </div>
               )}
 
-              <div className="pt-8 mt-2 border-t border-gray-100 grid grid-cols-3 gap-2 text-center text-[9px] font-bold uppercase text-gray-400 group-hover/card:text-gray-600 transition-colors">
-                <div className="flex flex-col items-center"><ShieldCheck />Sécurisé</div>
-                <div className="flex flex-col items-center"><TruckIcon />Rapide</div>
-                <div className="flex flex-col items-center"><StarIcon />Qualité</div>
-              </div>
+              {/* NOUVEAU BLOC : RÉASSURANCE DYNAMIQUE (SANITY) */}
+              {product.productFeatures && product.productFeatures.length > 0 && (
+                <div className="pt-8 mt-2 border-t border-gray-100">
+                  <div className="bg-[#FAFAFA] border border-gray-100 rounded-[2rem] p-5 shadow-sm">
+                    <ul className="space-y-3">
+                      {product.productFeatures.map((feature: any, idx: number) => (
+                        <li key={idx} className="flex items-center gap-3 text-[12px] font-medium text-gray-600">
+                          <span className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 shadow-sm border border-blue-100/50">
+                            {feature.icon || "✓"}
+                          </span>
+                          <span className="leading-snug">{feature.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
             </div>
             
             {/* VERSION MOBILE */}
             <div className="lg:hidden mt-12 space-y-12 pb-20">
                 <div className="w-full h-px bg-gray-100"></div>
-                <section>
+                <section aria-labelledby="desc-mobile-title">
                    <div className="bg-blue-600 rounded-2xl p-4 mb-8 shadow-lg">
-                     <h2 className="text-[16px] font-black uppercase tracking-[0.3em] text-white text-center">Description détaillée</h2>
+                     <h2 id="desc-mobile-title" className="text-[16px] font-black uppercase tracking-[0.3em] text-white text-center">Description détaillée</h2>
                    </div>
                    <div className="prose prose-blue max-w-none text-gray-600 text-[15px] px-2">
                       <PortableText value={product.content || []} />
                    </div>
                 </section>
                 {product.faq && product.faq.length > 0 && (
-                  <section className="border-t border-gray-100 pt-12">
+                  <section className="border-t border-gray-100 pt-12" aria-labelledby="faq-mobile-title">
                      <div className="bg-blue-600 rounded-2xl p-4 mb-8 shadow-lg">
-                       <h2 className="text-[16px] font-black uppercase tracking-[0.3em] text-white text-center">Questions fréquentes</h2>
+                       <h2 id="faq-mobile-title" className="text-[16px] font-black uppercase tracking-[0.3em] text-white text-center">Questions fréquentes</h2>
                      </div>
                      <div className="space-y-4 px-2">
                        {product.faq.map((item: any, i: number) => (
                          <div key={i} className="border border-gray-100 rounded-2xl overflow-hidden bg-[#FAFAFA]/50">
-                           <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between p-6 text-left">
+                           <button 
+                             onClick={() => setOpenFaq(openFaq === i ? null : i)} 
+                             className="w-full flex items-center justify-between p-6 text-left"
+                             aria-expanded={openFaq === i}
+                             aria-controls={`faq-answer-mobile-${i}`}
+                           >
                              <span className="text-[15px] font-bold text-gray-900">{item.question}</span>
                              <div className={`transition-transform ${openFaq === i ? 'rotate-45 text-blue-600' : 'text-gray-400'}`}><PlusIcon /></div>
                            </button>
-                           {openFaq === i && <p className="p-6 pt-0 text-[14px] text-gray-500 leading-relaxed">{item.answer}</p>}
+                           {openFaq === i && <p id={`faq-answer-mobile-${i}`} className="p-6 pt-0 text-[14px] text-gray-500 leading-relaxed">{item.answer}</p>}
                          </div>
                        ))}
                      </div>
@@ -350,7 +365,7 @@ export default function ProductPageClient({ product }: { product: any }) {
           </div>
         </div>
 
-        {/* MAILLAGE INTERNE : PASSAGE EN UL/LI POUR LE SEO */}
+        {/* MAILLAGE INTERNE : OPTIMISÉ AVEC COMPOSANT IMAGE */}
         {product.category?.relatedProducts && product.category.relatedProducts.length > 0 && (
           <section className="mt-24 border-t border-gray-100 pt-16 mb-16" aria-labelledby="related-title">
             <div className="flex flex-col items-center mb-12 text-center">
@@ -364,9 +379,11 @@ export default function ProductPageClient({ product }: { product: any }) {
                     <Link href={`/${rel.slug?.current}`} title={`Voir le produit ${rel.name}`} className="group bg-[#FAFAFA] rounded-[2.5rem] p-5 transition-all hover:bg-white hover:shadow-2xl border border-transparent hover:border-gray-100 flex flex-col items-center">
                       <div className="aspect-square w-full flex items-center justify-center mb-4 overflow-hidden relative">
                         {rel.mainImage && (
-                          <img 
+                          <Image 
                             src={urlFor(rel.mainImage).url()} 
-                            alt={`${rel.name} reconditionné certifié RENW France`} 
+                            alt={`Photo de ${rel.name}`} 
+                            width={150}
+                            height={150}
                             className="max-h-[120px] w-auto object-contain group-hover:scale-110 transition-transform duration-500 ease-out" 
                             loading="lazy"
                           />

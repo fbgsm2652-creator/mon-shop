@@ -1,17 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useUser } from "@clerk/nextjs";
 import { client } from "@/sanity/lib/client";
 import { useInvoice } from "@/hooks/use-invoice";
 import { shipOrderAction, resetOrderAction, cancelOrderAction } from "@/app/actions/order-actions"; 
 import { 
-  Package, Truck, FileText, Search, X, 
+  Package, Truck, Search, X, 
   RefreshCcw, TrendingUp, ShoppingCart, 
-  CheckCircle2, Download, Send, Layers, ChevronRight,
-  History, MailCheck, Printer, ArrowRight, ChevronLeft, Trash2,
-  DollarSign, Activity, Globe
+  CheckCircle2, Download, Layers, ChevronRight,
+  MailCheck, ChevronLeft, Trash2,
+  DollarSign, Activity
 } from "lucide-react";
+
+// --- TYPES (Pour corriger les erreurs sans casser le code) ---
+interface OrderItem {
+  productName: string;
+  currentStock: number;
+  imei?: string;
+  price?: number;
+}
+
+interface Order {
+  _id: string;
+  _createdAt: string;
+  _updatedAt?: string;
+  orderNumber: string;
+  orderDate?: string;
+  status: string;
+  totalAmount: number;
+  totalCostPrice?: number;
+  customer?: {
+    name: string;
+    email: string;
+    city?: string;
+  };
+  items: OrderItem[];
+}
 
 export default function PreparationDashboard() {
   const { user, isLoaded } = useUser();
@@ -19,21 +44,20 @@ export default function PreparationDashboard() {
   const isAdmin = role === "admin";
 
   const [activeTab, setActiveTab] = useState<"flux" | "history" | "finance">("flux");
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const { generateInvoice } = useInvoice();
   
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [trackingNumber, setTrackingNumber] = useState("");
   const [itemsImei, setItemsImei] = useState<{[key: string]: string}>({});
 
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      // RÉCUPÉRATION DATA : On injecte le stock actuel via la jointure "product->stock"
       const query = `{
         "toPrepare": *[_type == "order" && status in ["pending", "processing"]] | order(orderDate asc) {
           ...,
@@ -46,42 +70,53 @@ export default function PreparationDashboard() {
         "allForStats": *[_type == "order"] | order(orderDate desc) {
           ...,
           items[] { ..., "currentStock": product->stock }
-        },
-        "siteSettings": *[_type == "settings"][0]
+        }
       }`;
       const data = await client.fetch(query);
       
-      let targetOrders = [];
+      let targetOrders: Order[] = [];
       if (activeTab === "flux") targetOrders = data.toPrepare;
       else if (activeTab === "history") targetOrders = data.shipped;
       else targetOrders = data.allForStats;
 
-      setOrders(targetOrders.map((o: any) => ({ ...o, siteSettings: data.siteSettings })));
-    } catch (error) { console.error(error); } finally { setLoading(false); }
+      setOrders(targetOrders);
+    } catch (error) { 
+      console.error(error); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
-  useEffect(() => { if (isLoaded) fetchOrders(); }, [isLoaded, activeTab]);
+  useEffect(() => { 
+    if (isLoaded) fetchOrders(); 
+  }, [isLoaded, activeTab]);
 
-  // --- CALCULS STATS & FINANCES (LOGIQUE MÉTIER) ---
-  const financeStats = orders.reduce((acc, o) => {
-    const ca = o.totalAmount || 0;
-    const stripeFees = ca > 0 ? (ca * 0.015) + 0.25 : 0;
-    const shipCost = 6.50; 
-    const purchasePrice = o.totalCostPrice || (ca * 0.7); 
-    const margeNet = ca - purchasePrice - stripeFees - shipCost;
+  // --- CALCULS STATS (LOGIQUE MÉTIER) ---
+  const financeStats = useMemo(() => {
+    return orders.reduce((acc, o) => {
+      const ca = o.totalAmount || 0;
+      const stripeFees = ca > 0 ? (ca * 0.015) + 0.25 : 0;
+      const shipCost = 6.50; 
+      const purchasePrice = o.totalCostPrice || (ca * 0.7); 
+      const margeNet = ca - purchasePrice - stripeFees - shipCost;
 
-    acc.ca += ca;
-    acc.margeTotal += margeNet;
-    acc.fraisTotal += (stripeFees + shipCost);
-    acc.count += 1;
-    return acc;
-  }, { ca: 0, margeTotal: 0, fraisTotal: 0, count: 0 });
+      acc.ca += ca;
+      acc.margeTotal += margeNet;
+      acc.fraisTotal += (stripeFees + shipCost);
+      acc.count += 1;
+      return acc;
+    }, { ca: 0, margeTotal: 0, fraisTotal: 0, count: 0 });
+  }, [orders]);
 
   const averageBasket = financeStats.count > 0 ? financeStats.ca / financeStats.count : 0;
-  const todaySales = orders.filter(o => new Date(o.orderDate || o._createdAt).toDateString() === new Date().toDateString()).length;
+  
+  const todaySales = orders.filter(o => {
+    const d = o.orderDate || o._createdAt;
+    return new Date(d).toDateString() === new Date().toDateString();
+  }).length;
 
-  // --- SYSTÈME DE NOTIFICATIONS ---
-  const notifyCustomerByEmail = async (order: any, trackNum: string) => {
+  // --- NOTIFICATIONS & ACTIONS ---
+  const notifyCustomerByEmail = async (order: Order, trackNum: string) => {
     try {
       await fetch('/api/send-shipping-email', {
         method: 'POST',
@@ -96,7 +131,7 @@ export default function PreparationDashboard() {
     } catch (error) { console.error("❌ Erreur email expédition:", error); }
   };
 
-  const notifySAV = async (order: any, type: "RE-PREP" | "CANCEL") => {
+  const notifySAV = async (order: Order, type: "RE-PREP" | "CANCEL") => {
     try {
       await fetch('/api/send-sav-email', {
         method: 'POST',
@@ -135,7 +170,7 @@ export default function PreparationDashboard() {
     if (!selectedOrder || isUpdating) return;
     setIsUpdating(true);
     try {
-      const updatedItems = selectedOrder.items.map((item: any, index: number) => ({
+      const updatedItems = selectedOrder.items.map((item, index) => ({
         ...item,
         imei: itemsImei[`${selectedOrder._id}-${index}`] || item.imei || ""
       }));
@@ -311,7 +346,7 @@ export default function PreparationDashboard() {
                          </div>
                       </td>
                       <td className="p-8 text-center">
-                        {order.items?.map((item: any, idx: number) => (
+                        {order.items?.map((item: OrderItem, idx: number) => (
                           <div key={idx} className="flex flex-col items-center mb-1">
                             <span className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase">{item.productName}</span>
                             {item.currentStock <= 2 && (
@@ -391,7 +426,7 @@ export default function PreparationDashboard() {
               </div>
 
               <div className="space-y-8">
-                {selectedOrder.items?.map((item: any, i: number) => {
+                {selectedOrder.items?.map((item: OrderItem, i: number) => {
                   const currentImei = itemsImei[`${selectedOrder._id}-${i}`] || "";
                   const isImeiValid = currentImei.length === 15;
 
