@@ -232,7 +232,8 @@ export default function ProductPageClient({ product }: { product: any }) {
                    <li key={i} className="snap-center shrink-0 w-[85vw] aspect-square relative rounded-[1.5rem] overflow-hidden bg-white shadow-[0_10px_40px_rgba(0,0,0,0.06)] border border-gray-100 flex items-center justify-center p-4">
                      {img && (
                        <div className="relative w-[90%] h-[90%]">
-                         <Image src={typeof img === 'string' ? img : urlFor(img).url()} alt={img.alt || product.name} fill priority={i === 0} className="object-contain mix-blend-multiply" sizes="85vw" />
+                         {/* 🔥 CORRECTION 1 (Mobile) : LCP Priority */}
+                         <Image src={typeof img === 'string' ? img : urlFor(img).url()} alt={img.alt || product.name} fill priority={i === 0} fetchPriority={i === 0 ? "high" : "auto"} className="object-contain mix-blend-multiply" sizes="85vw" />
                        </div>
                      )}
                    </li>
@@ -243,7 +244,16 @@ export default function ProductPageClient({ product }: { product: any }) {
              <div className="hidden md:flex flex-col gap-4">
                 <div className="w-full aspect-square bg-white rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.06)] border border-gray-100 flex items-center justify-center p-10 relative">
                    <div className="relative w-[75%] h-[75%]">
-                      <Image src={typeof (allImages[selectedImageIdx] || allImages[0]) === 'string' ? (allImages[selectedImageIdx] || allImages[0]) : urlFor(allImages[selectedImageIdx] || allImages[0]).url()} fill className="object-contain mix-blend-multiply" alt=""/>
+                      {/* 🔥 CORRECTION 1 (Desktop) : LCP Priority & Tailles */}
+                      <Image 
+                        src={typeof (allImages[selectedImageIdx] || allImages[0]) === 'string' ? (allImages[selectedImageIdx] || allImages[0]) : urlFor(allImages[selectedImageIdx] || allImages[0]).url()} 
+                        fill 
+                        priority 
+                        fetchPriority="high" 
+                        sizes="(max-width: 768px) 100vw, 50vw" 
+                        className="object-contain mix-blend-multiply" 
+                        alt={product.name || "Produit RENW"}
+                      />
                    </div>
                 </div>
                 
@@ -290,14 +300,17 @@ export default function ProductPageClient({ product }: { product: any }) {
 
             {crossSellProduct && (
               <div className="mb-6 bg-white border border-gray-100 rounded-2xl p-4 shadow-[0_10px_40px_rgba(0,0,0,0.08)] w-full box-border">
-                <h3 className="text-[14px] mb-3 text-[#111111]">Souvent achetés ensemble</h3>
+                {/* 🔥 CORRECTION 3 : h3 remplacé par h2 pour l'accessibilité SEO */}
+                <h2 className="text-[14px] mb-3 text-[#111111] font-semibold">Souvent achetés ensemble</h2>
                 <div className="flex items-center gap-3 w-full">
                   <div className="w-12 h-12 shrink-0 bg-[#F5F5F7] rounded-lg relative overflow-hidden p-1.5">
-                     {displayImage && <Image src={typeof displayImage === 'string' ? displayImage : urlFor(displayImage).url()} fill className="object-contain mix-blend-multiply" alt="Produit principal" />}
+                     {/* 🔥 CORRECTION 2 : sizes="60px" pour la miniature */}
+                     {displayImage && <Image src={typeof displayImage === 'string' ? displayImage : urlFor(displayImage).url()} fill sizes="60px" className="object-contain mix-blend-multiply" alt="Produit principal" />}
                   </div>
                   <Plus className="text-[#111111] shrink-0 opacity-40" size={16} />
                   <div className="w-12 h-12 shrink-0 bg-[#F5F5F7] rounded-lg relative overflow-hidden p-1.5">
-                     {crossSellProduct.mainImage && <Image src={typeof crossSellProduct.mainImage === 'string' ? crossSellProduct.mainImage : urlFor(crossSellProduct.mainImage).url()} fill className="object-contain mix-blend-multiply" alt={crossSellProduct.name} />}
+                     {/* 🔥 CORRECTION 2 : sizes="60px" pour la miniature */}
+                     {crossSellProduct.mainImage && <Image src={typeof crossSellProduct.mainImage === 'string' ? crossSellProduct.mainImage : urlFor(crossSellProduct.mainImage).url()} fill sizes="60px" className="object-contain mix-blend-multiply" alt={crossSellProduct.name} />}
                   </div>
                   <div className="flex flex-col ml-1 min-w-0 flex-1">
                      <span className="text-[12px] md:text-[13px] leading-tight line-clamp-2 text-[#111111] break-words">{crossSellProduct.name}</span>
@@ -409,7 +422,8 @@ export default function ProductPageClient({ product }: { product: any }) {
           
           {product.content && (
             <div className="mb-12">
-               <h3 className="text-[20px] md:text-[24px] mb-6 text-[#111111]">Description détaillée</h3>
+               {/* 🔥 CORRECTION 3 : h3 vers h2 */}
+               <h2 className="text-[20px] md:text-[24px] mb-6 text-[#111111] font-semibold">Description détaillée</h2>
                <div className="prose max-w-none text-[#111111] text-[14px] md:text-[15px] leading-relaxed font-normal">
                  <PortableText value={product.content} />
                </div>
@@ -418,7 +432,8 @@ export default function ProductPageClient({ product }: { product: any }) {
 
           {product.specifications && product.specifications.length > 0 && (
             <div className="mb-12">
-              <h3 className="text-[20px] md:text-[24px] mb-6 text-[#111111]">Spécifications techniques</h3>
+              {/* 🔥 CORRECTION 3 : h3 vers h2 */}
+              <h2 className="text-[20px] md:text-[24px] mb-6 text-[#111111] font-semibold">Spécifications techniques</h2>
               <div className="flex flex-col border-t border-gray-200">
                 {product.specifications.map((spec: any, idx: number) => (
                   <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 py-4 gap-1">
@@ -432,7 +447,8 @@ export default function ProductPageClient({ product }: { product: any }) {
 
           {product.faq && product.faq.length > 0 && (
             <div className="mb-12">
-              <h3 className="text-[20px] md:text-[24px] mb-6 text-[#111111]">Questions fréquentes</h3>
+              {/* 🔥 CORRECTION 3 : h3 vers h2 */}
+              <h2 className="text-[20px] md:text-[24px] mb-6 text-[#111111] font-semibold">Questions fréquentes</h2>
               <div className="space-y-3">
                 {product.faq.map((item: any, i: number) => (
                   <details key={i} className="group bg-white rounded-xl border border-gray-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden shadow-sm transition-all">
@@ -456,9 +472,10 @@ export default function ProductPageClient({ product }: { product: any }) {
         {product.category?.relatedProducts && product.category.relatedProducts.filter((p:any) => p._id !== product._id).length > 0 && (
           <div className="mt-16 md:mt-24 border-t border-gray-200 pt-16 md:pt-20">
             <div className="mb-10 text-center md:text-left">
-              <h3 className="text-[22px] md:text-[28px] font-[1000] tracking-tighter text-[#111111] uppercase">
+              {/* 🔥 CORRECTION 3 : h3 vers h2 */}
+              <h2 className="text-[22px] md:text-[28px] font-[1000] tracking-tighter text-[#111111] uppercase">
                 Dans la même catégorie
-              </h3>
+              </h2>
               <p className="text-gray-500 text-[14px] mt-2 font-medium">Découvrez toutes nos pièces et appareils associés pour {product.category.title}.</p>
             </div>
             
@@ -499,9 +516,10 @@ export default function ProductPageClient({ product }: { product: any }) {
         {product.bestSellers && product.bestSellers.filter((p:any) => p._id !== product._id).length > 0 && (
           <div className="mt-16 md:mt-24 border-t border-gray-200 pt-16 md:pt-20">
             <div className="mb-10 text-center md:text-left">
-              <h3 className="text-[22px] md:text-[28px] font-[1000] tracking-tighter text-[#111111] uppercase">
+              {/* 🔥 CORRECTION 3 : h3 vers h2 */}
+              <h2 className="text-[22px] md:text-[28px] font-[1000] tracking-tighter text-[#111111] uppercase">
                 Les plus convoités
-              </h3>
+              </h2>
               <p className="text-gray-500 text-[14px] mt-2 font-medium">Découvrez les appareils et pièces préférés de nos clients.</p>
             </div>
             
