@@ -6,7 +6,6 @@ export default defineType({
   title: 'Configuration Header',
   type: 'document',
   icon: ControlsIcon,
-  // Sécurité : Un seul Header possible pour éviter les conflits
   // @ts-ignore
   __experimental_actions: ['update', 'publish'], 
   fields: [
@@ -56,6 +55,15 @@ export default defineType({
       type: 'string',
       initialValue: 'Le Mag',
       description: 'Le nom du lien vers votre blog ou actualités.',
+    }),
+
+    // 🔥 LE CHAMP DES SCRIPTS (PIXELS, TIKTOK, GOOGLE) 🔥
+    defineField({
+      name: 'headerScripts',
+      title: 'Scripts globaux (Tracking / Pixels)',
+      type: 'text',
+      rows: 5,
+      description: 'Collez ici vos scripts (ex: Pixel Facebook, Google Analytics). Ils seront injectés automatiquement sur toutes les pages.',
     }),
   ],
   preview: {

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CookieBanner from "@/components/CookieBanner"; // 👈 Import de la bannière Cookie
 import { Toaster } from "react-hot-toast";
 import { ClerkProvider } from "@clerk/nextjs"; 
 import { frFR } from "@clerk/localizations"; 
@@ -26,8 +27,9 @@ async function getNavigationData() {
         }
       }
     },
+    // On récupère bien les paramètres du Header (dont les scripts)
     "headerSettings": *[_type == "headerSettings"][0],
-    "home": *[_type == "homeSettings"][0]{headerScripts, metaTitle, metaDescription}
+    "home": *[_type == "homeSettings"][0]{metaTitle, metaDescription}
   }`;
   
   const { data } = await sanityFetch({ query });
@@ -94,12 +96,16 @@ export default async function RootLayout({
           style={eliteFont}
         >
           <Toaster position="top-center" />
+
+          {/* 🔥 La Bannière Cookie RGPD (invisible dans le back-office) 🔥 */}
+          {!isStudio && <CookieBanner />}
           
-          {home?.headerScripts && (
+          {/* 🔥 Injection des scripts (Pixel, Analytics) depuis Sanity 🔥 */}
+          {headerSettings?.headerScripts && (
             <Script
               id="header-scripts"
               strategy="afterInteractive"
-              dangerouslySetInnerHTML={{ __html: home.headerScripts }}
+              dangerouslySetInnerHTML={{ __html: headerSettings.headerScripts }}
             />
           )}
 
