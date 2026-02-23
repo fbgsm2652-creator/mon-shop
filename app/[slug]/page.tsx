@@ -82,11 +82,17 @@ export default async function DynamicPage(props: { params: Promise<{ slug: strin
       "category": category-> {
         title,
         "slug": slug.current,
-        "relatedProducts": *[_type == "product" && references(^._id) && slug.current != $slug][0...4] {
+        // 🔥 SEO MAILLAGE VERTICAL : On charge TOUS les produits associés avec leur prix pour le composant
+        "relatedProducts": *[_type == "product" && references(^._id) && slug.current != $slug] | order(_createdAt desc) {
           _id,
           name,
-          "slug": slug,
-          "mainImage": coalesce(mainImage, images[0])
+          "slug": slug.current,
+          "mainImage": coalesce(mainImage.asset->url, images[0].asset->url),
+          "minPrice": select(
+            isReconditioned == true => grades[0].capacities[0].price,
+            price > 0 => price,
+            0
+          )
         }
       },
 
@@ -95,6 +101,19 @@ export default async function DynamicPage(props: { params: Promise<{ slug: strin
         name,
         "slug": slug,
         "mainImage": coalesce(mainImage, images[0])
+      },
+
+      // 🔥 SEO MAILLAGE HORIZONTAL : On récupère les best-sellers définis dans la page d'accueil
+      "bestSellers": *[_type == "homeSettings"][0].bestSellers[]->{
+        _id,
+        name,
+        "slug": slug.current,
+        "mainImage": coalesce(mainImage.asset->url, images[0].asset->url),
+        "minPrice": select(
+          isReconditioned == true => grades[0].capacities[0].price,
+          price > 0 => price,
+          0
+        )
       },
 
       "categoryProducts": *[_type == "product" && (category->slug.current == $slug || brand == $slug)] | order(_createdAt desc) {

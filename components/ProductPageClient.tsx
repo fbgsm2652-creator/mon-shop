@@ -26,10 +26,8 @@ export default function ProductPageClient({ product }: { product: any }) {
   const [userHasSelectedColor, setUserHasSelectedColor] = useState(false);
   const [showModal, setShowModal] = useState(false);
   
-  // Desktop Gallery State
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   
-  // Sticky Bar Logic
   const addToCartRef = useRef<HTMLButtonElement>(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
 
@@ -54,7 +52,6 @@ export default function ProductPageClient({ product }: { product: any }) {
 
   const isReconditioned = product.isReconditioned === true;
   
-  // Calculs Prix Principal
   let unitPrice = 0;
   if (isReconditioned) {
     unitPrice = product.grades?.[selectedVariant]?.capacities?.[selectedCap]?.price || 0;
@@ -76,7 +73,6 @@ export default function ProductPageClient({ product }: { product: any }) {
 
   const allImages = [displayImage, ...(product.images || [])].filter((v, i, a) => a.findIndex(t => (t.asset?._ref === v.asset?._ref)) === i);
 
-  // Cross-sell logic
   const crossSellProduct = product.crossSell;
   let crossSellPrice = 0;
   if (crossSellProduct) {
@@ -160,7 +156,6 @@ export default function ProductPageClient({ product }: { product: any }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       {product.headerScript && <Script id="product-js" strategy="afterInteractive">{product.headerScript}</Script>}
 
-      {/* --- MODAL SUCCÈS PANIER --- */}
       {showModal && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-[#111111]/70 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white rounded-[1.5rem] p-6 md:p-8 max-w-lg w-full shadow-2xl relative animate-in zoom-in duration-300 text-[#111111]">
@@ -182,7 +177,6 @@ export default function ProductPageClient({ product }: { product: any }) {
         </div>
       )}
 
-      {/* --- STICKY BAR MAGIQUE --- */}
       <div className={`fixed bottom-0 left-0 right-0 w-full z-[100] bg-white/95 backdrop-blur-xl border-t border-gray-200 p-3 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] transition-transform duration-500 ease-[cubic-bezier(0.5,0,0.2,1)] ${showStickyBar ? "translate-y-0" : "translate-y-full"}`}>
         <div className="max-w-7xl mx-auto px-2 flex items-center justify-between gap-3 w-full box-border">
           <div className="hidden md:flex items-center gap-4">
@@ -208,14 +202,13 @@ export default function ProductPageClient({ product }: { product: any }) {
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4 md:pt-6">
         
-        {/* FIL D'ARIANE DESKTOP */}
         <nav aria-label="Fil d'Ariane" className="hidden md:block mb-6 text-[13px] text-[#111111] opacity-60">
           <ol className="flex items-center gap-2">
             <li><Link href="/" className="hover:opacity-100 transition-colors">Accueil</Link></li>
             <ChevronRight size={14} className="stroke-1" />
             {product.category && (
               <>
-                <li><Link href={`/categories/${product.category.slug?.current || ""}`} className="hover:opacity-100 transition-colors">{product.category.title || product.category.name}</Link></li>
+                <li><Link href={`/${product.category.slug?.current || product.category.slug || ""}`} className="hover:opacity-100 transition-colors">{product.category.title || product.category.name}</Link></li>
                 <ChevronRight size={14} className="stroke-1" />
               </>
             )}
@@ -223,28 +216,23 @@ export default function ProductPageClient({ product }: { product: any }) {
           </ol>
         </nav>
 
-        {/* --- GRILLE PRODUIT PRINCIPALE --- */}
         <div className="grid lg:grid-cols-12 gap-6 md:gap-12 items-start">
           
-          {/* COLONNE GAUCHE : IMAGES CAROUSEL */}
           <div className="lg:col-span-6 xl:col-span-7 lg:sticky lg:top-24 relative w-full overflow-hidden">
              
-             {/* Fil d'Ariane Mobile */}
              <div className="md:hidden mb-4 text-[12px] text-[#111111] opacity-60 flex items-center gap-1">
                 <Link href="/">Accueil</Link>
                 <ChevronRight size={12} className="stroke-1" />
                 <span className="truncate opacity-100">{product.category?.title || product.category?.name || "Produit"}</span>
              </div>
 
-             {/* Affichage Mobile : Carrousel Swipe */}
              <div className="md:hidden w-full relative -mx-4 px-4 overflow-hidden">
                <ul className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-none gap-3 pb-3">
                  {allImages.map((img: any, i: number) => (
                    <li key={i} className="snap-center shrink-0 w-[85vw] aspect-square relative rounded-[1.5rem] overflow-hidden bg-white shadow-[0_10px_40px_rgba(0,0,0,0.06)] border border-gray-100 flex items-center justify-center p-4">
                      {img && (
-                       // Image occupée à 90% sur Mobile
                        <div className="relative w-[90%] h-[90%]">
-                         <Image src={urlFor(img).url()} alt={img.alt || product.name} fill priority={i === 0} className="object-contain mix-blend-multiply" sizes="85vw" />
+                         <Image src={typeof img === 'string' ? img : urlFor(img).url()} alt={img.alt || product.name} fill priority={i === 0} className="object-contain mix-blend-multiply" sizes="85vw" />
                        </div>
                      )}
                    </li>
@@ -252,22 +240,19 @@ export default function ProductPageClient({ product }: { product: any }) {
                </ul>
              </div>
 
-             {/* Affichage Desktop : 1 Grande Image + Petites Miniatures */}
              <div className="hidden md:flex flex-col gap-4">
                 <div className="w-full aspect-square bg-white rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.06)] border border-gray-100 flex items-center justify-center p-10 relative">
-                   {/* Image occupée à 75% sur PC */}
                    <div className="relative w-[75%] h-[75%]">
-                      <Image src={urlFor(allImages[selectedImageIdx] || allImages[0]).url()} fill className="object-contain mix-blend-multiply" alt=""/>
+                      <Image src={typeof (allImages[selectedImageIdx] || allImages[0]) === 'string' ? (allImages[selectedImageIdx] || allImages[0]) : urlFor(allImages[selectedImageIdx] || allImages[0]).url()} fill className="object-contain mix-blend-multiply" alt=""/>
                    </div>
                 </div>
                 
-                {/* Miniatures très réduites avec flex-wrap pour ne pas casser la page */}
                 {allImages.length > 1 && (
                   <div className="flex gap-3 flex-wrap pb-2">
                     {allImages.map((img: any, i: number) => (
                        <button key={i} onClick={() => setSelectedImageIdx(i)} className={`w-14 h-14 shrink-0 rounded-xl bg-white p-2 border transition-all ${selectedImageIdx === i ? 'border-[#0066CC] shadow-md' : 'border-gray-100 shadow-[0_4px_10px_rgba(0,0,0,0.05)] hover:border-gray-300'}`}>
                          <div className="relative w-full h-full">
-                            <Image src={urlFor(img).url()} fill className="object-contain mix-blend-multiply" alt=""/>
+                            <Image src={typeof img === 'string' ? img : urlFor(img).url()} fill className="object-contain mix-blend-multiply" alt=""/>
                          </div>
                        </button>
                     ))}
@@ -277,10 +262,8 @@ export default function ProductPageClient({ product }: { product: any }) {
 
           </div>
 
-          {/* COLONNE DROITE : INFOS, ACHAT, OPTIONS */}
           <div className="lg:col-span-6 xl:col-span-5 flex flex-col w-full overflow-hidden max-w-full box-border">
             
-            {/* 1. Titre H1 (Noir) */}
             <div className="mb-4">
               <h1 className="text-[26px] md:text-[32px] leading-tight text-[#111111] mb-1">
                 {product.name}
@@ -290,7 +273,6 @@ export default function ProductPageClient({ product }: { product: any }) {
               </div>
             </div>
 
-            {/* 2. BLOC PRIX & ACHAT (Hauteur -30%, Fond blanc avec ombre) */}
             <div className="bg-white rounded-2xl p-3 md:p-4 mb-5 shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 flex flex-row items-center justify-between gap-3 w-full box-border">
               <div className="flex flex-col gap-0 shrink-0">
                 <span className="text-[26px] md:text-[32px] leading-none text-[#111111]">{unitPrice}€</span>
@@ -306,17 +288,16 @@ export default function ProductPageClient({ product }: { product: any }) {
               </button>
             </div>
 
-            {/* 3. BUNDLE / CROSS-SELL (Le fameux bouton Bleu) */}
             {crossSellProduct && (
               <div className="mb-6 bg-white border border-gray-100 rounded-2xl p-4 shadow-[0_10px_40px_rgba(0,0,0,0.08)] w-full box-border">
                 <h3 className="text-[14px] mb-3 text-[#111111]">Souvent achetés ensemble</h3>
                 <div className="flex items-center gap-3 w-full">
                   <div className="w-12 h-12 shrink-0 bg-[#F5F5F7] rounded-lg relative overflow-hidden p-1.5">
-                     {displayImage && <Image src={urlFor(displayImage).url()} fill className="object-contain mix-blend-multiply" alt="Produit principal" />}
+                     {displayImage && <Image src={typeof displayImage === 'string' ? displayImage : urlFor(displayImage).url()} fill className="object-contain mix-blend-multiply" alt="Produit principal" />}
                   </div>
                   <Plus className="text-[#111111] shrink-0 opacity-40" size={16} />
                   <div className="w-12 h-12 shrink-0 bg-[#F5F5F7] rounded-lg relative overflow-hidden p-1.5">
-                     {crossSellProduct.mainImage && <Image src={urlFor(crossSellProduct.mainImage).url()} fill className="object-contain mix-blend-multiply" alt={crossSellProduct.name} />}
+                     {crossSellProduct.mainImage && <Image src={typeof crossSellProduct.mainImage === 'string' ? crossSellProduct.mainImage : urlFor(crossSellProduct.mainImage).url()} fill className="object-contain mix-blend-multiply" alt={crossSellProduct.name} />}
                   </div>
                   <div className="flex flex-col ml-1 min-w-0 flex-1">
                      <span className="text-[12px] md:text-[13px] leading-tight line-clamp-2 text-[#111111] break-words">{crossSellProduct.name}</span>
@@ -331,7 +312,6 @@ export default function ProductPageClient({ product }: { product: any }) {
               </div>
             )}
 
-            {/* 4. OPTIONS EN TUILES (Ombre Bleutée, Texte Noir) */}
             <div className="space-y-5 mb-6 w-full box-border">
               {isReconditioned ? (
                 <>
@@ -405,7 +385,6 @@ export default function ProductPageClient({ product }: { product: any }) {
               )}
             </div>
 
-            {/* 5. RÉASSURANCE (Bleu Très Très Clair) */}
             {product.productFeatures && product.productFeatures.length > 0 && (
               <div className="flex flex-col gap-2 mt-4 w-full box-border">
                 {product.productFeatures.map((feature: any, idx: number) => (
@@ -426,10 +405,8 @@ export default function ProductPageClient({ product }: { product: any }) {
           </div>
         </div>
 
-        {/* --- SECTION BASSE (ORDRE: 1. Desc 2. Specs 3. FAQ) --- */}
         <div className="mt-16 md:mt-24 max-w-4xl border-t border-gray-200 pt-12 md:pt-16">
           
-          {/* 1. Description */}
           {product.content && (
             <div className="mb-12">
                <h3 className="text-[20px] md:text-[24px] mb-6 text-[#111111]">Description détaillée</h3>
@@ -439,7 +416,6 @@ export default function ProductPageClient({ product }: { product: any }) {
             </div>
           )}
 
-          {/* 2. Spécifications techniques (Format Liste Claire et Non Déformable) */}
           {product.specifications && product.specifications.length > 0 && (
             <div className="mb-12">
               <h3 className="text-[20px] md:text-[24px] mb-6 text-[#111111]">Spécifications techniques</h3>
@@ -454,7 +430,6 @@ export default function ProductPageClient({ product }: { product: any }) {
             </div>
           )}
 
-          {/* 3. FAQ Accordéon */}
           {product.faq && product.faq.length > 0 && (
             <div className="mb-12">
               <h3 className="text-[20px] md:text-[24px] mb-6 text-[#111111]">Questions fréquentes</h3>
@@ -476,6 +451,92 @@ export default function ProductPageClient({ product }: { product: any }) {
             </div>
           )}
         </div>
+
+        {/* 🔥 SEO MAILLAGE VERTICAL : Dans la même catégorie 🔥 */}
+        {product.category?.relatedProducts && product.category.relatedProducts.filter((p:any) => p._id !== product._id).length > 0 && (
+          <div className="mt-16 md:mt-24 border-t border-gray-200 pt-16 md:pt-20">
+            <div className="mb-10 text-center md:text-left">
+              <h3 className="text-[22px] md:text-[28px] font-[1000] tracking-tighter text-[#111111] uppercase">
+                Dans la même catégorie
+              </h3>
+              <p className="text-gray-500 text-[14px] mt-2 font-medium">Découvrez toutes nos pièces et appareils associés pour {product.category.title}.</p>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-6">
+              {product.category.relatedProducts.filter((p:any) => p._id !== product._id).slice(0, 4).map((p: any) => (
+                <article key={p._id} className="h-full">
+                  <Link href={`/${p.slug}`} className="group block text-center bg-white border border-gray-100 rounded-[1.5rem] p-4 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:-translate-y-1 h-full flex flex-col">
+                    <div className="aspect-square bg-[#F5F5F7] rounded-xl overflow-hidden mb-4 flex items-center justify-center p-3 relative">
+                      {p.mainImage && (
+                        <div className="relative w-[75%] h-[75%]">
+                          <Image 
+                            src={typeof p.mainImage === 'string' ? p.mainImage : urlFor(p.mainImage).url()} 
+                            alt={`Photo de ${p.name}`} 
+                            fill
+                            className="object-contain transition-transform duration-500 group-hover:scale-105 mix-blend-multiply" 
+                            sizes="(max-width: 768px) 50vw, 20vw"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div className="px-1 space-y-2 flex flex-col flex-grow text-left">
+                      <h4 className="text-[12px] md:text-[13px] font-bold text-[#111111] line-clamp-2 leading-tight uppercase">{p.name}</h4>
+                      <div className="pt-2 mt-auto w-full flex flex-col">
+                        <span className="text-[14px] md:text-[16px] font-[1000] text-[#0066CC] mb-2">{p.minPrice ? `${p.minPrice}€` : "Voir le produit"}</span>
+                        <span className="inline-block bg-[#F5F5F7] text-[#111111] px-4 py-2.5 rounded-lg font-black text-[9px] md:text-[10px] uppercase tracking-widest group-hover:bg-[#111111] group-hover:text-white transition-all duration-300 w-full text-center">
+                          Découvrir
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 🔥 SEO MAILLAGE HORIZONTAL : Les plus convoités (Best Sellers) 🔥 */}
+        {product.bestSellers && product.bestSellers.filter((p:any) => p._id !== product._id).length > 0 && (
+          <div className="mt-16 md:mt-24 border-t border-gray-200 pt-16 md:pt-20">
+            <div className="mb-10 text-center md:text-left">
+              <h3 className="text-[22px] md:text-[28px] font-[1000] tracking-tighter text-[#111111] uppercase">
+                Les plus convoités
+              </h3>
+              <p className="text-gray-500 text-[14px] mt-2 font-medium">Découvrez les appareils et pièces préférés de nos clients.</p>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-6">
+              {product.bestSellers.filter((p:any) => p._id !== product._id).slice(0, 4).map((p: any) => (
+                <article key={p._id} className="h-full">
+                  <Link href={`/${p.slug}`} className="group block text-center bg-white border border-gray-100 rounded-[1.5rem] p-4 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:-translate-y-1 h-full flex flex-col">
+                    <div className="aspect-square bg-[#F5F5F7] rounded-xl overflow-hidden mb-4 flex items-center justify-center p-3 relative">
+                      {p.mainImage && (
+                        <div className="relative w-[75%] h-[75%]">
+                          <Image 
+                            src={typeof p.mainImage === 'string' ? p.mainImage : urlFor(p.mainImage).url()} 
+                            alt={`Photo de ${p.name}`} 
+                            fill
+                            className="object-contain transition-transform duration-500 group-hover:scale-105 mix-blend-multiply" 
+                            sizes="(max-width: 768px) 50vw, 20vw"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div className="px-1 space-y-2 flex flex-col flex-grow text-left">
+                      <h4 className="text-[12px] md:text-[13px] font-bold text-[#111111] line-clamp-2 leading-tight uppercase">{p.name}</h4>
+                      <div className="pt-2 mt-auto w-full flex flex-col">
+                        <span className="text-[14px] md:text-[16px] font-[1000] text-[#0066CC] mb-2">{p.minPrice ? `${p.minPrice}€` : "Voir le produit"}</span>
+                        <span className="inline-block bg-[#F5F5F7] text-[#111111] px-4 py-2.5 rounded-lg font-black text-[9px] md:text-[10px] uppercase tracking-widest group-hover:bg-[#111111] group-hover:text-white transition-all duration-300 w-full text-center">
+                          Découvrir
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
 
       </div>
     </main>
