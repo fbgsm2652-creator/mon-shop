@@ -55,10 +55,12 @@ export default async function Footer() {
             <nav key={idx} aria-labelledby={`footer-nav-${idx}`} className="px-0 md:px-10 border-t md:border-t-0 md:border-l border-gray-200 pt-10 md:pt-0">
               {/* La petite barre passée en BLEU RENW */}
               <div className="hidden md:block h-8 w-[3px] bg-[#0066CC] mb-6 rounded-full" />
-              {/* Titre de la colonne passé en Gris */}
-              <h4 id={`footer-nav-${idx}`} className="text-[16px] md:text-[18px] font-bold text-gray-500 mb-6">
+              
+              {/* 🔥 CORRECTION ACCESSIBILITÉ : h4 remplacé par h3 */}
+              <h3 id={`footer-nav-${idx}`} className="text-[16px] md:text-[18px] font-bold text-gray-500 mb-6">
                 {section.title}
-              </h4>
+              </h3>
+              
               <ul className="space-y-4">
                 {section.links?.map((link: any, lIdx: number) => (
                   <li key={lIdx}>

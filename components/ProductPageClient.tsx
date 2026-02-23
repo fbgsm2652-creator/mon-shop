@@ -177,11 +177,12 @@ export default function ProductPageClient({ product }: { product: any }) {
         </div>
       )}
 
+      {/* 🔥 Sticky Bar avec sizes="50px" appliqué */}
       <div className={`fixed bottom-0 left-0 right-0 w-full z-[100] bg-white/95 backdrop-blur-xl border-t border-gray-200 p-3 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] transition-transform duration-500 ease-[cubic-bezier(0.5,0,0.2,1)] ${showStickyBar ? "translate-y-0" : "translate-y-full"}`}>
         <div className="max-w-7xl mx-auto px-2 flex items-center justify-between gap-3 w-full box-border">
           <div className="hidden md:flex items-center gap-4">
-            <div className="w-12 h-12 relative bg-gray-50 rounded-lg p-0 overflow-hidden border border-gray-100">
-              {displayImage && <Image src={urlFor(displayImage).url()} fill className="object-cover mix-blend-multiply" alt="" />}
+            <div className="w-12 h-12 relative shrink-0 bg-gray-50 rounded-lg p-0 overflow-hidden border border-gray-100">
+              {displayImage && <Image src={urlFor(displayImage).url()} fill sizes="50px" className="object-cover mix-blend-multiply" alt="Miniature" />}
             </div>
             <div className="flex flex-col">
               <span className="text-[15px] leading-tight line-clamp-1 max-w-[300px] text-[#111111]">{product.name}</span>
@@ -232,7 +233,6 @@ export default function ProductPageClient({ product }: { product: any }) {
                    <li key={i} className="snap-center shrink-0 w-[85vw] aspect-square relative rounded-[1.5rem] overflow-hidden bg-white shadow-[0_10px_40px_rgba(0,0,0,0.06)] border border-gray-100 flex items-center justify-center p-4">
                      {img && (
                        <div className="relative w-[90%] h-[90%]">
-                         {/* 🔥 CORRECTION 1 (Mobile) : LCP Priority */}
                          <Image src={typeof img === 'string' ? img : urlFor(img).url()} alt={img.alt || product.name} fill priority={i === 0} fetchPriority={i === 0 ? "high" : "auto"} className="object-contain mix-blend-multiply" sizes="85vw" />
                        </div>
                      )}
@@ -244,7 +244,6 @@ export default function ProductPageClient({ product }: { product: any }) {
              <div className="hidden md:flex flex-col gap-4">
                 <div className="w-full aspect-square bg-white rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.06)] border border-gray-100 flex items-center justify-center p-10 relative">
                    <div className="relative w-[75%] h-[75%]">
-                      {/* 🔥 CORRECTION 1 (Desktop) : LCP Priority & Tailles */}
                       <Image 
                         src={typeof (allImages[selectedImageIdx] || allImages[0]) === 'string' ? (allImages[selectedImageIdx] || allImages[0]) : urlFor(allImages[selectedImageIdx] || allImages[0]).url()} 
                         fill 
@@ -300,16 +299,13 @@ export default function ProductPageClient({ product }: { product: any }) {
 
             {crossSellProduct && (
               <div className="mb-6 bg-white border border-gray-100 rounded-2xl p-4 shadow-[0_10px_40px_rgba(0,0,0,0.08)] w-full box-border">
-                {/* 🔥 CORRECTION 3 : h3 remplacé par h2 pour l'accessibilité SEO */}
                 <h2 className="text-[14px] mb-3 text-[#111111] font-semibold">Souvent achetés ensemble</h2>
                 <div className="flex items-center gap-3 w-full">
                   <div className="w-12 h-12 shrink-0 bg-[#F5F5F7] rounded-lg relative overflow-hidden p-1.5">
-                     {/* 🔥 CORRECTION 2 : sizes="60px" pour la miniature */}
                      {displayImage && <Image src={typeof displayImage === 'string' ? displayImage : urlFor(displayImage).url()} fill sizes="60px" className="object-contain mix-blend-multiply" alt="Produit principal" />}
                   </div>
                   <Plus className="text-[#111111] shrink-0 opacity-40" size={16} />
                   <div className="w-12 h-12 shrink-0 bg-[#F5F5F7] rounded-lg relative overflow-hidden p-1.5">
-                     {/* 🔥 CORRECTION 2 : sizes="60px" pour la miniature */}
                      {crossSellProduct.mainImage && <Image src={typeof crossSellProduct.mainImage === 'string' ? crossSellProduct.mainImage : urlFor(crossSellProduct.mainImage).url()} fill sizes="60px" className="object-contain mix-blend-multiply" alt={crossSellProduct.name} />}
                   </div>
                   <div className="flex flex-col ml-1 min-w-0 flex-1">
@@ -422,7 +418,6 @@ export default function ProductPageClient({ product }: { product: any }) {
           
           {product.content && (
             <div className="mb-12">
-               {/* 🔥 CORRECTION 3 : h3 vers h2 */}
                <h2 className="text-[20px] md:text-[24px] mb-6 text-[#111111] font-semibold">Description détaillée</h2>
                <div className="prose max-w-none text-[#111111] text-[14px] md:text-[15px] leading-relaxed font-normal">
                  <PortableText value={product.content} />
@@ -432,7 +427,6 @@ export default function ProductPageClient({ product }: { product: any }) {
 
           {product.specifications && product.specifications.length > 0 && (
             <div className="mb-12">
-              {/* 🔥 CORRECTION 3 : h3 vers h2 */}
               <h2 className="text-[20px] md:text-[24px] mb-6 text-[#111111] font-semibold">Spécifications techniques</h2>
               <div className="flex flex-col border-t border-gray-200">
                 {product.specifications.map((spec: any, idx: number) => (
@@ -447,7 +441,6 @@ export default function ProductPageClient({ product }: { product: any }) {
 
           {product.faq && product.faq.length > 0 && (
             <div className="mb-12">
-              {/* 🔥 CORRECTION 3 : h3 vers h2 */}
               <h2 className="text-[20px] md:text-[24px] mb-6 text-[#111111] font-semibold">Questions fréquentes</h2>
               <div className="space-y-3">
                 {product.faq.map((item: any, i: number) => (
@@ -472,7 +465,6 @@ export default function ProductPageClient({ product }: { product: any }) {
         {product.category?.relatedProducts && product.category.relatedProducts.filter((p:any) => p._id !== product._id).length > 0 && (
           <div className="mt-16 md:mt-24 border-t border-gray-200 pt-16 md:pt-20">
             <div className="mb-10 text-center md:text-left">
-              {/* 🔥 CORRECTION 3 : h3 vers h2 */}
               <h2 className="text-[22px] md:text-[28px] font-[1000] tracking-tighter text-[#111111] uppercase">
                 Dans la même catégorie
               </h2>
@@ -516,7 +508,6 @@ export default function ProductPageClient({ product }: { product: any }) {
         {product.bestSellers && product.bestSellers.filter((p:any) => p._id !== product._id).length > 0 && (
           <div className="mt-16 md:mt-24 border-t border-gray-200 pt-16 md:pt-20">
             <div className="mb-10 text-center md:text-left">
-              {/* 🔥 CORRECTION 3 : h3 vers h2 */}
               <h2 className="text-[22px] md:text-[28px] font-[1000] tracking-tighter text-[#111111] uppercase">
                 Les plus convoités
               </h2>
