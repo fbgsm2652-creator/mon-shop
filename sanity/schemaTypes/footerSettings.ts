@@ -6,9 +6,12 @@ export default defineType({
   title: 'Configuration du Footer',
   type: 'document',
   icon: ComponentIcon,
-  // Empêche la création de plusieurs documents "Footer"
+  
+  // 👇 VOICI LA CORRECTION 👇
+  // J'ai commenté ces deux lignes. Cela va faire réapparaître le bouton "Créer" dans Sanity.
   // @ts-ignore
-  __experimental_actions: ['update', 'publish'], 
+  // __experimental_actions: ['update', 'publish'], 
+  
   fields: [
     defineField({
       name: 'logoImage',

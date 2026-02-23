@@ -1,118 +1,88 @@
-"use client";
-
 import { client } from "@/sanity/lib/client";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { urlFor } from "@/sanity/lib/image";
 
-export default function Footer() {
-  const [settings, setSettings] = useState<any>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+export default async function Footer() {
+  // On force la mise à jour pour éviter le cache
+  const settings = await client.fetch(
+    `*[_type == "footerSettings"][0]`, 
+    {}, 
+    { cache: 'no-store' }
+  );
 
-  useEffect(() => {
-    async function fetchSettings() {
-      try {
-        const data = await client.fetch(`*[_type == "footerSettings"][0]`);
-        setSettings(data);
-      } catch (error) {
-        console.error("Erreur chargement Footer Sanity:", error);
-      } finally {
-        setIsLoaded(true); 
-      }
-    }
-    fetchSettings();
-  }, []);
+  if (!settings) return null;
 
-  if (!isLoaded) return null;
-
-  const impactFont = { fontFamily: "'Inter', sans-serif" };
+  const eliteFont = { fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" };
 
   return (
-    <footer style={impactFont} className="bg-[#FAFAFA] border-t border-gray-200 pt-24 pb-12 mt-40 selection:bg-blue-100 text-[#111111]">
+    <footer style={eliteFont} className="bg-white border-t border-gray-200 pt-24 pb-12 mt-40 selection:bg-[#0066CC] selection:text-white text-[#111111]">
       <div className="max-w-7xl mx-auto px-6">
         
-        {/* GRILLE PRINCIPALE EN 4 COLONNES */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-0 mb-24 border-b border-gray-200 pb-20">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8 mb-20 border-b border-gray-200 pb-20">
           
           {/* PARTIE 1 : INFO ENTREPRISE */}
-          <div className="pr-8 space-y-8 pb-10 md:pb-0">
+          <div className="pr-8 space-y-6 pb-10 md:pb-0">
             <Link href="/" className="block hover:opacity-80 transition-opacity">
-              {settings?.logoImage ? (
+              {settings.logoImage ? (
                 <Image 
                   src={urlFor(settings.logoImage).url()} 
-                  alt={settings?.logoText || "RENW"} 
-                  width={120} 
-                  height={50} 
+                  alt={`${settings.logoText} - Expertise Reconditionnement`} 
+                  width={140} 
+                  height={55} 
                   className="object-contain"
                 />
               ) : (
-                <span className="text-3xl font-[1000] tracking-tighter uppercase italic">
-                  RENW<span className="text-blue-600">.</span>
+                <span className="text-[32px] font-bold tracking-tighter uppercase text-[#111111]">
+                  {settings.logoText}<span className="text-[#0066CC]">.</span>
                 </span>
               )}
             </Link>
-            <p className="text-[14px] text-gray-500 leading-relaxed font-medium">
-              {settings?.vision || "Expertise certifiée dans le reconditionnement de haute technologie et pièces détachées premium."}
+            <p className="text-[15px] md:text-[16px] text-[#111111] leading-relaxed font-medium">
+              {settings.vision}
             </p>
-            <address className="not-italic space-y-4 pt-4">
-              <p className="text-[11px] font-black uppercase tracking-widest text-gray-400">Siège Social</p>
-              <p className="text-[13px] font-bold text-gray-800 leading-snug max-w-[200px]">
-                {settings?.address || "France / Algérie"}
+            <address className="not-italic space-y-2 pt-4">
+              {/* Titre passé en Gris */}
+              <p className="text-[15px] font-bold text-gray-500">Siège Social</p>
+              <p className="text-[14px] md:text-[15px] font-medium text-[#111111] leading-snug max-w-[250px]">
+                {settings.address}
               </p>
             </address>
           </div>
 
-          {/* PARTIE 2, 3, 4 : DYNAMIQUES (LIGNES BLEUES MÉGA MENU) */}
-          {settings?.sections && settings.sections.length > 0 ? (
-            settings.sections.slice(0, 3).map((section: any, idx: number) => (
-              <div key={idx} className="px-0 md:px-10 border-t md:border-t-0 md:border-l border-gray-200 pt-10 md:pt-0">
-                <div className="hidden md:block h-6 w-[2px] bg-blue-600 mb-6" />
-                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600 mb-8 italic">
-                  {section.title}
-                </h4>
-                <ul className="space-y-4">
-                  {section.links?.map((link: any, lIdx: number) => (
-                    <li key={lIdx}>
-                      <Link href={link.url || "#"} className="text-[14px] font-[700] text-gray-700 hover:text-blue-600 transition-all flex items-center group">
-                        <span className="w-0 group-hover:w-2 h-[2px] bg-blue-600 mr-0 group-hover:mr-2 transition-all duration-300" />
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          ) : (
-            <>
-              <div className="px-0 md:px-10 border-l border-gray-200">
-                <div className="h-6 w-[2px] bg-blue-600 mb-6" />
-                <h4 className="text-[10px] font-black uppercase text-blue-600 mb-8 italic">Catalogue</h4>
-                <ul className="text-[14px] font-bold text-gray-400 space-y-4"><li>Bientôt disponible</li></ul>
-              </div>
-              <div className="px-0 md:px-10 border-l border-gray-200">
-                <div className="h-6 w-[2px] bg-blue-600 mb-6" />
-                <h4 className="text-[10px] font-black uppercase text-blue-600 mb-8 italic">Assistance</h4>
-                <ul className="text-[14px] font-bold text-gray-400 space-y-4"><li>Contactez-nous</li></ul>
-              </div>
-              <div className="px-0 md:px-10 border-l border-gray-200">
-                <div className="h-6 w-[2px] bg-blue-600 mb-6" />
-                <h4 className="text-[10px] font-black uppercase text-blue-600 mb-8 italic">Légal</h4>
-                <ul className="text-[14px] font-bold text-gray-400 space-y-4"><li>Mentions légales</li></ul>
-              </div>
-            </>
-          )}
+          {/* PARTIE DYNAMIQUE (Colonnes de liens) */}
+          {settings.sections?.slice(0, 3).map((section: any, idx: number) => (
+            <nav key={idx} aria-labelledby={`footer-nav-${idx}`} className="px-0 md:px-10 border-t md:border-t-0 md:border-l border-gray-200 pt-10 md:pt-0">
+              {/* La petite barre passée en BLEU RENW */}
+              <div className="hidden md:block h-8 w-[3px] bg-[#0066CC] mb-6 rounded-full" />
+              {/* Titre de la colonne passé en Gris */}
+              <h4 id={`footer-nav-${idx}`} className="text-[16px] md:text-[18px] font-bold text-gray-500 mb-6">
+                {section.title}
+              </h4>
+              <ul className="space-y-4">
+                {section.links?.map((link: any, lIdx: number) => (
+                  <li key={lIdx}>
+                    {/* Liens en Noir Pur */}
+                    <Link href={link.url || "#"} className="text-[15px] md:text-[16px] font-medium text-[#111111] hover:text-[#0066CC] transition-colors flex items-center group relative w-fit pb-1">
+                      {link.label}
+                      <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#111111] transition-all duration-300 group-hover:w-full" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
         </div>
 
         {/* BAS DU FOOTER */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-          <span className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-black italic">
-            © {new Date().getFullYear()} {settings?.logoText || "RENW"} — TECHNOLOGY FOR THE FUTURE.
+          <span className="text-[12px] md:text-[13px] text-[#111111] uppercase tracking-[0.15em] font-bold text-center md:text-left">
+            © {new Date().getFullYear()} {settings.logoText} — TECHNOLOGY FOR THE FUTURE.
           </span>
-          <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
-            <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse" />
-            <span className="text-[10px] font-[1000] uppercase tracking-widest text-[#111111]">
-              {settings?.locationCity || "Paris"} | {settings?.locationCountry || "France"}
+          <div className="flex items-center gap-3 bg-[#F5F5F7] px-5 py-3 rounded-full border border-gray-200 shadow-sm">
+            <span className="w-2 h-2 bg-[#0066CC] rounded-full animate-pulse shadow-[0_0_8px_rgba(0,102,204,0.6)]" />
+            <span className="text-[12px] font-bold uppercase tracking-widest text-[#111111]">
+              {settings.locationCity} | {settings.locationCountry}
             </span>
           </div>
         </div>

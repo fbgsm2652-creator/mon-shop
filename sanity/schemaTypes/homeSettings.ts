@@ -20,6 +20,7 @@ export const homeSettings = defineType({
       title: 'Slider Principal (Haut de page)',
       type: 'array',
       group: 'hero',
+      description: 'Ajoutez plusieurs images pour créer un carrousel glissant.',
       of: [{
         type: 'object',
         fields: [
@@ -40,14 +41,14 @@ export const homeSettings = defineType({
       title: 'Bouton de Transition 1',
       type: 'string',
       group: 'bento',
-      description: 'Le bouton long juste avant la grille (Ex: "NOS SÉLECTIONS")',
+      description: 'Le bouton long juste avant la grille (Ex: "Livraison gratuite sur tous les smartphones")',
     }),
 
     // --- 3. BENTO GRID ---
     defineField({
       name: 'bentoGrid',
-      title: 'Grille d\'images (Bento)',
-      description: 'Ajoute 4 éléments pour respecter le design asymétrique (le 1er et le 4ème seront plus grands).',
+      title: 'Grille d\'images (Explorez l\'univers)',
+      description: 'Ajoute 4 éléments pour respecter le design (1 grand, 2 petits sur la 1ère ligne).',
       type: 'array',
       group: 'bento',
       validation: Rule => Rule.max(4),
@@ -64,10 +65,23 @@ export const homeSettings = defineType({
       }]
     }),
 
+    // --- NOUVEAU : LES CLIENTS AIMENT CECI ---
+    defineField({
+      name: 'bestSellers',
+      title: 'Les clients aiment ceci (4 produits max)',
+      type: 'array',
+      group: 'products',
+      validation: Rule => Rule.max(4),
+      of: [{
+        type: 'reference',
+        to: [{ type: 'product' }]
+      }]
+    }),
+
     // --- 4. RÉASSURANCE ---
     defineField({
       name: 'reassurance',
-      title: 'Blocs de Réassurance (Gris)',
+      title: 'Blocs de Réassurance',
       type: 'array',
       group: 'reassurance',
       of: [{
@@ -90,7 +104,7 @@ export const homeSettings = defineType({
       group: 'seo',
       fields: [
         { name: 'title', title: 'Grand Titre', type: 'string', description: 'Ex: Expertise Tech & Reconditionné Certifié' },
-        { name: 'content', title: 'Texte descriptif', type: 'text', rows: 4, description: 'Le texte justifié en gris.' }
+        { name: 'content', title: 'Texte descriptif', type: 'text', rows: 4, description: 'Le texte en noir pur.' }
       ]
     }),
 
@@ -109,10 +123,10 @@ export const homeSettings = defineType({
       title: 'Produits Phares à afficher',
       type: 'array',
       group: 'products',
-      validation: Rule => Rule.max(8), // Pour ne pas casser le design
+      validation: Rule => Rule.max(8),
       of: [{
         type: 'reference',
-        to: [{ type: 'product' }] // Référence ton schéma produit existant
+        to: [{ type: 'product' }] 
       }]
     }),
   ],

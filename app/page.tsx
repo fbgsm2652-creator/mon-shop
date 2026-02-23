@@ -2,183 +2,316 @@ import { client } from "@/sanity/lib/client";
 import Image from "next/image";
 import Link from "next/link";
 import { urlFor } from "@/sanity/lib/image";
+import AutoSlider from "@/components/AutoSlider"; // <-- On importe notre Slider magique !
+
+// Revalidation toutes les 60 secondes pour avoir des données fraîches
+export const revalidate = 60;
+
+// Les Meta Tags de la page d'accueil (SEO 10000%)
+export const metadata = {
+  title: "RENW | L'Expert du Smartphone Reconditionné et Pièces Détachées",
+  description: "Découvrez notre sélection de smartphones reconditionnés Premium garantis 12 mois, testés sur 40 points de contrôle. Pièces détachées d'origine et compatibles.",
+};
+
+// --- DÉFINITION DE L'ICÔNE ---
+const PlusIcon = ({ className }: { className?: string }) => (
+  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+);
 
 export default async function HomePage() {
+  // REQUÊTE GROQ SURPUISSANTE
   const data = await client.fetch(`*[_type == "homeSettings"][0]{
     ...,
     featuredProducts[]->{
       _id,
       name,
       "slug": slug.current,
-      "imageUrl": images[0].asset->url,
-      "price": price,
-      brand
+      "imageUrl": mainImage.asset->url,
+      "price": coalesce(price, grades[0].capacities[0].price, simpleVariants[0].price),
+      "originalPrice": priceWhenNew
+    },
+    bestSellers[]->{
+      _id,
+      name,
+      "slug": slug.current,
+      "imageUrl": mainImage.asset->url,
+      "price": coalesce(price, grades[0].capacities[0].price, simpleVariants[0].price),
+      "originalPrice": priceWhenNew
     }
   }`);
 
-  const btnStyle = "bg-white text-black px-10 py-4 rounded-full font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-black hover:text-white transition-all duration-300";
-  const btnPriceStyle = "inline-block bg-white text-black px-8 py-3 rounded-full font-black text-[9px] uppercase tracking-[0.2em] border border-gray-100 group-hover:bg-[#111111] group-hover:text-white transition-all duration-300";
-  
-  const btnSelectionStyle = "bg-white text-black px-10 md:px-[136px] py-5 rounded-full font-black text-[9px] md:text-xs uppercase tracking-[0.3em] shadow-lg border border-gray-100 hover:bg-black hover:text-white transition-all duration-500 whitespace-nowrap inline-block";
-  const btnProduitsStyle = "bg-white text-black px-10 md:px-[125px] py-[18px] rounded-full font-black text-[9px] md:text-xs uppercase tracking-[0.3em] shadow-lg border border-gray-100 hover:bg-black hover:text-white transition-all duration-500 whitespace-nowrap inline-block";
+  // Les questions/réponses de la FAQ
+  const faqs = [
+    {
+      question: "Pouvez-vous m'aider à recycler mon ancien téléphone ?",
+      answer: "Notre Service Recyclage est là pour vous mettre en relation avec les bonnes personnes et vous simplifier cette démarche. Si votre article a encore de la valeur, obtenez une estimation immédiate via notre Service Reprise. L'expédition est offerte."
+    },
+    {
+      question: "D'où proviennent les appareils reconditionnés RENW ?",
+      answer: "Tous nos appareils proviennent de circuits de reprise européens certifiés. Ils sont ensuite testés sur plus de 40 points de contrôle, réparés si nécessaire avec des pièces d'origine ou compatibles de haute qualité, et nettoyés par nos experts en France."
+    },
+    {
+      question: "Quelle est la garantie sur vos produits ?",
+      answer: "Nous offrons une garantie commerciale de 12 à 24 mois sur tous nos appareils reconditionnés. En cas de problème, notre SAV français s'engage à vous répondre sous 24h et à procéder à un échange ou une réparation rapide."
+    },
+    {
+      question: "Est-ce que je peux payer en plusieurs fois ?",
+      answer: "Oui, absolument. Nous proposons des facilités de paiement sécurisées en 3x ou 4x sans frais par carte bancaire pour vous permettre de vous équiper sereinement."
+    }
+  ];
+
+  // Le schéma JSON-LD pour Google (Rich Snippets)
+  const seoSchema = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "RENW France",
+      "alternateName": "RENW Technology",
+      "url": "https://renw.fr",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://renw.fr/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "RENW",
+      "url": "https://renw.fr",
+      "logo": "https://renw.fr/logo.png",
+      "description": "Expert français en smartphones reconditionnés et pièces détachées de haute qualité.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "FR"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    }
+  ];
+
+  // --- STYLES COMMUNS ---
+  const btnPriceStyle = "inline-block bg-[#111111] text-white px-6 py-3 rounded-xl font-normal text-[11px] md:text-[12px] uppercase tracking-widest shadow-[0_8px_20px_rgba(0,0,0,0.15)] hover:opacity-90 transition-all duration-300 w-full text-center";
+  const btnSectionStyle = "bg-[#111111] text-white px-6 md:px-12 py-4 md:py-5 rounded-2xl font-normal text-[12px] md:text-[14px] uppercase tracking-widest shadow-[0_10px_30px_rgba(0,0,0,0.2)] border border-[#111111] transition-all duration-500 whitespace-nowrap inline-block";
 
   return (
-    <main className="bg-white text-[#111111] font-sans antialiased overflow-x-hidden">
+    <main className="bg-white text-[#111111] font-light antialiased overflow-x-hidden">
       
-      {/* NOUVEAU : H1 CACHÉ POUR LE SEO (Lu en premier par les robots) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(seoSchema) }}
+      />
+
       <h1 className="sr-only">RENW France : Smartphones Reconditionnés et Pièces Détachées Certifiées</h1>
 
-      {/* 1. HERO SLIDER - SEO: LCP Optimization */}
-      <section className="w-full" aria-label="Offre promotionnelle">
-        <div className="relative h-[65vh] w-full overflow-hidden">
-          {data?.slider?.[0] && (
-            <div className="relative h-full w-full group">
-              <Image 
-                src={urlFor(data.slider[0].image).url()} 
-                alt={data.slider[0].alt || "Expertise Renw Tech"} 
-                fill 
-                className="object-cover" 
-                priority // Critique pour le score LCP de Google
-                sizes="100vw"
-              />
-              {data.slider[0].showBadge && (
-                <div className="absolute top-10 left-10 md:left-20">
-                  <span className="bg-white/20 backdrop-blur-md text-black px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-widest">
-                    {data.btnTransition1 || "Nos Sélections"}
-                  </span>
-                </div>
-              )}
-              <div className="absolute bottom-12 left-10 md:left-20">
-                <Link href={data.slider[0].link || "/"} className={btnStyle}>
-                  Découvrir l'expertise
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
+      {/* 1. NOTRE NOUVEAU HERO SLIDER AUTO */}
+      <section className="w-full px-4 md:px-6 mt-4 md:mt-8" aria-label="Offre promotionnelle">
+        <AutoSlider slides={data?.slider || []} btnText={data?.btnTransition1 || "L'Art du Reconditionné"} />
       </section>
 
-      {/* 2. BOUTON TRANSITION 1 */}
-      <div className="flex justify-center mt-12 relative z-10 px-4">
-        <div className={btnSelectionStyle}>
-          {data?.btnTransition1 || "NOS SÉLECTIONS"}
+      {/* 2. TICKER ANNONCE */}
+      <div className="flex justify-center mt-10 mb-16 relative z-10 px-4">
+        <div className={btnSectionStyle}>
+          {data?.btnTransition1 || "Livraison gratuite sur tous les smartphones"}
         </div>
       </div>
 
-      {/* 3. BENTO GRID - SEO: Sémantique */}
-      <section className="max-w-7xl mx-auto px-6 mt-16" aria-label="Nos catégories de produits">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-          {data?.bentoGrid?.map((item: any, i: number) => (
-            <Link key={i} href={item.link || "#"} className={`relative overflow-hidden rounded-[2.5rem] bg-[#F5F5F7] aspect-square group ${i === 0 || i === 3 ? 'md:col-span-2 md:aspect-[21/9]' : ''}`}>
-              {item.image && <Image src={urlFor(item.image).url()} alt={item.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" sizes="(max-width: 768px) 50vw, 33vw" />}
-              <div className="absolute bottom-8 left-8">
-                {/* CHANGEMENT SÉMANTIQUE : h3 -> span pour ne pas casser la hiérarchie H1 > H2 */}
-                <span className="block text-[10px] font-black uppercase tracking-[0.3em] text-[#111111]">{item.title}</span>
-              </div>
-            </Link>
-          ))}
+      {/* 3. BENTO GRID */}
+      <section className="max-w-[1400px] mx-auto px-4 md:px-6 mb-24" aria-label="Nos catégories de produits">
+        <div className="flex items-end justify-between mb-8 px-2">
+           <h2 className="text-[24px] md:text-[32px] font-normal tracking-tighter text-[#111111]">Explorez l'univers RENW.</h2>
         </div>
-      </section>
-
-      {/* 4. RÉASSURANCE - Signal de confiance (E-E-A-T) */}
-      <section className="bg-[#F5F5F7] py-16 mt-20" aria-label="Engagements de qualité">
-        <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-between items-center gap-10">
-          {data?.reassurance?.map((item: any, i: number) => (
-            <div key={i} className="flex items-center gap-5 flex-1 min-w-[250px] justify-center">
-              {item.icon && (
-                <div className="relative w-[50px] h-[50px]">
-                  <Image src={urlFor(item.icon).url()} alt="" fill className="object-contain opacity-80" />
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
+          {data?.bentoGrid?.map((item: any, i: number) => {
+            const isBig = i === 0 || i === 3;
+            return (
+              <Link key={i} href={item.link || "#"} className={`relative overflow-hidden rounded-[1.5rem] bg-white group transition-all duration-500 shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.15)] hover:-translate-y-1 border border-gray-100 flex items-center justify-center p-6 h-[200px] md:h-[320px] ${isBig ? 'md:col-span-2 col-span-2' : 'col-span-1'}`}>
+                {item.image && (
+                  <div className="relative w-[70%] h-[70%] z-10">
+                    <Image src={urlFor(item.image).url()} alt={item.title} fill className="object-contain mix-blend-multiply transition-transform duration-700 group-hover:scale-105" sizes="(max-width: 768px) 50vw, 33vw" />
+                  </div>
+                )}
+                <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.08)] border border-gray-100 z-20 transition-transform group-hover:-translate-y-1">
+                  <span className="block text-[11px] font-normal tracking-widest text-[#111111] uppercase">{item.title}</span>
                 </div>
-              )}
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">{item.text}</span>
-            </div>
-          ))}
+              </Link>
+            )
+          })}
         </div>
       </section>
 
-      {/* 5. BLOC TEXTE SEO - Transformation en H2 sémantique (Le H1 est maintenant tout en haut) */}
-      <section className="max-w-4xl mx-auto px-6 py-20 text-center">
-        <h2 className="text-[22px] md:text-[32px] font-[1000] tracking-tighter uppercase mb-8 leading-tight">
+      {/* 4. LES CLIENTS AIMENT CECI */}
+      {data?.bestSellers && data.bestSellers.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 md:px-6 pb-24" aria-labelledby="best-sellers-title">
+          <div className="flex items-end justify-between mb-8 px-2">
+             <h2 id="best-sellers-title" className="text-[20px] md:text-[28px] font-normal tracking-tighter text-[#111111]">
+               Les clients aiment ceci
+             </h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {data.bestSellers.map((product: any) => {
+              const savings = product.originalPrice && product.originalPrice > product.price ? product.originalPrice - product.price : 0;
+              
+              return (
+                <article key={product._id} className="h-full">
+                  <Link href={`/${product.slug}`} className="group block text-center bg-white border border-gray-100 rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-5 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)] hover:-translate-y-2 h-full flex flex-col relative">
+                    <div className="aspect-square bg-[#F5F5F7] rounded-xl overflow-hidden mb-4 flex items-center justify-center p-4 relative">
+                      {product.imageUrl && (
+                        <div className="relative w-[70%] h-[70%]">
+                          <Image 
+                            src={product.imageUrl} 
+                            alt={`Photo de ${product.name}`} 
+                            fill
+                            className="object-contain transition-transform duration-500 group-hover:scale-105 mix-blend-multiply" 
+                            sizes="(max-width: 768px) 50vw, 25vw"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div className="px-1 space-y-2 flex flex-col flex-grow">
+                      <h3 className="text-[14px] md:text-[15px] font-normal text-[#111111] line-clamp-2 leading-tight text-left mt-1">{product.name}</h3>
+                      <div className="pt-3 mt-auto w-full flex flex-col">
+                        {savings > 0 && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-[11px] text-[#111111] line-through">Neuf {product.originalPrice}€</span>
+                            <span className="text-[#0A5C2F] text-[10px] font-normal px-1.5 py-0.5 rounded bg-[#D9EFD5]/50 border border-[#0A5C2F]/20">-{savings.toFixed(0)}€</span>
+                          </div>
+                        )}
+                        <span className={btnPriceStyle}>
+                          {product.price ? `${product.price} €` : "Voir le prix"}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </article>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* 5. RÉASSURANCE */}
+      <section className="bg-[#F4F9FF] py-16 md:py-24 mt-8" aria-label="Engagements de qualité">
+        <div className="max-w-7xl mx-auto px-6">
+           <h2 className="text-center text-[22px] md:text-[28px] font-normal tracking-tighter mb-12 text-[#111111]">Des engagements solides.</h2>
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12 text-center">
+             {data?.reassurance?.map((item: any, i: number) => (
+               <div key={i} className="flex flex-col items-center bg-white p-6 md:p-8 rounded-[1.5rem] border border-[#E5F0FF] shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_15px_40px_rgba(0,0,0,0.1)] transition-shadow duration-300">
+                 {item.icon && (
+                   <div className="w-12 h-12 flex items-center justify-center mb-4">
+                     <div className="relative w-[32px] h-[32px]">
+                       <Image src={urlFor(item.icon).url()} alt="" fill className="object-contain" />
+                     </div>
+                   </div>
+                 )}
+                 <h3 className="text-[13px] md:text-[14px] font-normal leading-snug text-[#111111]">{item.text}</h3>
+               </div>
+             ))}
+           </div>
+        </div>
+      </section>
+
+      {/* 6. BLOC TEXTE SEO (Noir Pur) */}
+      <section className="bg-white max-w-4xl mx-auto px-6 py-20 text-center">
+        <h2 className="text-[22px] md:text-[32px] font-normal tracking-tighter mb-6 leading-tight text-[#111111]">
           {data?.seoBlock?.title || "Expertise Tech & Reconditionné Certifié"}
         </h2>
-        <div className="text-gray-500 leading-loose text-[15px] font-medium whitespace-pre-line px-4 md:px-10">
+        <div className="text-[#111111] font-normal leading-relaxed text-[15px] md:text-[16px] whitespace-pre-line">
           {data?.seoBlock?.content}
         </div>
       </section>
 
-      {/* 6. BOUTON TRANSITION 2 */}
-      <div className="flex justify-center mb-24 px-4">
-        <div className={btnProduitsStyle}>
+      {/* 7. BOUTON TRANSITION 2 */}
+      <div className="flex justify-center mb-20 px-4">
+        <div className={btnSectionStyle}>
           {data?.btnTransition2 || "NOS PRODUITS PHARES"}
         </div>
       </div>
 
-      {/* 7. PRODUITS PHARES */}
-      <section className="max-w-7xl mx-auto px-6 pb-32" aria-labelledby="featured-products-title">
+      {/* 8. PRODUITS PHARES */}
+      <section className="max-w-7xl mx-auto px-4 md:px-6 pb-24" aria-labelledby="featured-products-title">
         <h2 id="featured-products-title" className="sr-only">Nos produits en vedette</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
-          {data?.featuredProducts?.map((product: any) => (
-            <article key={product._id}>
-              {/* CORRECTION CRITIQUE URL COURTE : "/produit/${product.slug}" devient "/${product.slug}" */}
-              <Link href={`/${product.slug}`} className="group block text-center">
-                <div className="aspect-[4/5] bg-[#F5F5F7] rounded-[2.5rem] overflow-hidden mb-6 flex items-center justify-center p-10 transition-all group-hover:bg-white group-hover:shadow-2xl border border-transparent">
-                  {product.imageUrl && (
-                    <Image 
-                      src={product.imageUrl} 
-                      alt={`Photo de ${product.name}`} 
-                      width={280} 
-                      height={280} 
-                      className="object-contain transition-transform duration-500 group-hover:scale-110" 
-                    />
-                  )}
-                </div>
-                <div className="px-2 space-y-2">
-                  <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest italic">{product.brand}</p>
-                  <h3 className="text-[12px] font-black uppercase tracking-widest text-[#111111] line-clamp-1">{product.name}</h3>
-                  <div className="pt-2">
-                    <span className={btnPriceStyle}>
-                      {product.price ? `${product.price} €` : "Voir le prix"}
-                    </span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          {data?.featuredProducts?.map((product: any) => {
+            const savings = product.originalPrice && product.originalPrice > product.price ? product.originalPrice - product.price : 0;
+            
+            return (
+              <article key={product._id} className="h-full">
+                <Link href={`/${product.slug}`} className="group block text-center bg-white border border-gray-100 rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-5 transition-all duration-300 shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)] hover:-translate-y-2 h-full flex flex-col">
+                  <div className="aspect-square bg-[#F5F5F7] rounded-xl overflow-hidden mb-4 flex items-center justify-center p-4 relative">
+                    {product.imageUrl && (
+                      <div className="relative w-[70%] h-[70%]">
+                        <Image 
+                          src={product.imageUrl} 
+                          alt={`Photo de ${product.name}`} 
+                          fill
+                          className="object-contain transition-transform duration-500 group-hover:scale-105 mix-blend-multiply" 
+                          sizes="(max-width: 768px) 50vw, 25vw"
+                        />
+                      </div>
+                    )}
                   </div>
-                </div>
-              </Link>
-            </article>
-          ))}
+                  <div className="px-1 space-y-2 flex flex-col flex-grow">
+                    <h3 className="text-[14px] md:text-[15px] font-normal text-[#111111] line-clamp-2 leading-tight text-left mt-1">{product.name}</h3>
+                    <div className="pt-3 mt-auto w-full flex flex-col">
+                      {savings > 0 && (
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-[11px] text-[#111111] line-through">Neuf {product.originalPrice}€</span>
+                          <span className="text-[#0A5C2F] text-[10px] font-normal px-1.5 py-0.5 rounded bg-[#D9EFD5]/50 border border-[#0A5C2F]/20">-{savings.toFixed(0)}€</span>
+                        </div>
+                      )}
+                      <span className={btnPriceStyle}>
+                        {product.price ? `${product.price} €` : "Voir le prix"}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </article>
+            )
+          })}
         </div>
       </section>
 
-      {/* SEO MASTER JSON-LD ENRICHI (WebSite + Organization) */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify([
-            {
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              "name": "RENW France",
-              "alternateName": "RENW Technology",
-              "url": "https://renw.fr",
-              "potentialAction": {
-                "@type": "SearchAction",
-                "target": "https://renw.fr/search?q={search_term_string}",
-                "query-input": "required name=search_term_string"
-              }
-            },
-            {
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "name": "RENW",
-              "url": "https://renw.fr",
-              "logo": "https://renw.fr/logo.png", // Mets l'URL exacte de ton logo ici si tu l'as
-              "description": "Expert français en smartphones reconditionnés et pièces détachées de haute qualité.",
-              "address": {
-                "@type": "PostalAddress",
-                "addressCountry": "FR"
-              }
-            }
-          ])
-        }}
-      />
+      {/* 9. SECTION FAQ */}
+      <section className="bg-white py-20 border-t border-gray-100" aria-labelledby="faq-title">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="mb-10 text-left md:text-center">
+             <h2 id="faq-title" className="text-[24px] md:text-[32px] font-normal tracking-tighter text-[#111111]">
+               Questions fréquentes
+             </h2>
+          </div>
+          
+          <div className="space-y-3">
+            {faqs.map((faq, index) => (
+              <details key={index} className="group bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden transition-all duration-300">
+                <summary className="flex items-center justify-between cursor-pointer p-5 md:p-6 font-normal text-[14px] md:text-[15px] text-[#111111] outline-none">
+                  {faq.question}
+                  <span className="transition duration-300 group-open:rotate-45 ml-4 shrink-0 bg-[#F5F5F7] p-2 rounded-full text-[#111111]">
+                    <PlusIcon className="w-4 h-4 stroke-1" />
+                  </span>
+                </summary>
+                <div className="px-5 md:px-6 pb-6 pt-0">
+                  <p className="text-[#111111] font-normal leading-relaxed text-[13px] md:text-[14px]">
+                    {faq.answer}
+                  </p>
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
     </main>
   );
 }

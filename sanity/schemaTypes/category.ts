@@ -9,9 +9,8 @@ export const category = defineType({
   fields: [
     defineField({
       name: 'title',
-      title: 'Nom de la catégorie',
+      title: 'Nom de la catégorie (H1)',
       type: 'string',
-      description: 'Ex: iPhone 15 Pro ou Pièces détachées',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -19,72 +18,104 @@ export const category = defineType({
       title: 'Est-ce une catégorie finale ?',
       type: 'boolean',
       initialValue: false,
-      description: 'Activez pour les modèles qui ont leur propre page de vente (ex: iPhone 13).',
+    }),
+    // NOUVEAU : Pour identifier les onglets du menu haut (ex: iPhone, Samsung)
+    defineField({
+      name: 'isParent',
+      title: 'Afficher dans la barre de menu haut ?',
+      type: 'boolean',
+      initialValue: false,
+      hidden: ({ document }) => document?.isFinal === true,
     }),
     defineField({
       name: 'slug',
       title: 'Slug (URL)',
       type: 'slug',
       options: { source: 'title' },
-      hidden: ({ document }) => !document?.isFinal,
-      validation: (Rule) => Rule.custom((slug, context) => {
-        if (context.document?.isFinal && !slug) return 'L’URL est obligatoire pour une catégorie finale.'
-        return true
-      }),
-    }),
-    defineField({
-      name: 'parent',
-      title: 'Catégorie Parente',
-      type: 'reference',
-      to: [{ type: 'category' }],
-      description: 'Pour organiser la hiérarchie (ex: iPhone 15 Pro appartient à iPhone).',
-    }),
-    
-    // --- VISUELS ---
-    defineField({
-      name: 'menuImage',
-      title: 'Image du Méga Menu',
-      type: 'image',
-      description: 'Format vignette pour la navigation.',
-      options: { hotspot: true },
-    }),
-    defineField({
-      name: 'heroImage',
-      title: 'Image d’en-tête (Page)',
-      type: 'image',
-      description: 'Grande image affichée en haut de la page catégorie.',
-      hidden: ({ document }) => !document?.isFinal,
-      options: { hotspot: true },
+      // On le garde visible pour Final OU Parent
     }),
 
-    // --- ARMURE SEO (INDISPENSABLE POUR GOOGLE) ---
+    // --- MEGA MENU (Caché si c'est une page finale) ---
     defineField({
-      name: 'description',
-      title: 'Contenu Marketing (SEO)',
+      name: 'menuImage',
+      title: 'Image du Mega Menu',
+      type: 'image',
+      description: 'L\'image carrée qui s\'affiche à gauche dans le menu survolé.',
+      hidden: ({ document }) => !document?.isParent,
+    }),
+    defineField({
+      name: 'subCategories',
+      title: 'Structure du Mega Menu (Colonnes)',
       type: 'array',
-      description: 'Texte riche pour présenter le modèle et booster le référencement.',
-      of: [{ type: 'block' }],
-      hidden: ({ document }) => !document?.isFinal,
+      description: 'Ajoutez les colonnes du menu (ex: "Série iPhone 15", "Accessoires")',
+      hidden: ({ document }) => !document?.isParent,
+      of: [
+        {
+          type: 'object',
+          fields: [
+            { name: 'title', title: 'Titre de la colonne', type: 'string' },
+            { 
+              name: 'finalModels', 
+              title: 'Liens vers catégories finales', 
+              type: 'array',
+              of: [{ type: 'reference', to: [{ type: 'category' }] }] 
+            }
+          ]
+        }
+      ]
     }),
+
+    // --- PERSONNALISATION (Caché si c'est un parent de menu) ---
     defineField({
-      name: 'metaTitle',
-      title: 'Meta Title',
-      type: 'string',
-      description: 'Le titre bleu qui apparaît dans Google (Idéal: 50-60 caractères).',
-      hidden: ({ document }) => !document?.isFinal,
-    }),
-    defineField({
-      name: 'metaDescription',
-      title: 'Meta Description',
+      name: 'heroSubtitle',
+      title: 'Texte sous le H1',
       type: 'text',
-      description: 'Le texte sous le titre dans Google (Idéal: 150 caractères).',
+      description: 'Le texte gris et classe qui s’affiche juste sous le gros titre H1.',
       hidden: ({ document }) => !document?.isFinal,
     }),
-    
-    // --- FAQ (STRUCTURED DATA) ---
+    defineField({
+      name: 'engagementTitle',
+      title: 'Titre de la section Engagement',
+      type: 'string',
+      description: 'Ex: "L\'Engagement" (Le mot "RENW." s\'ajoute automatiquement en bleu sur le site)',
+      initialValue: 'L\'Engagement',
+      hidden: ({ document }) => !document?.isFinal,
+    }),
+    defineField({
+      name: 'features',
+      title: 'Logos de Réassurance',
+      type: 'array',
+      description: 'Ajoutez les petits logos spécifiques à cette catégorie',
+      hidden: ({ document }) => !document?.isFinal,
+      of: [
+        {
+          type: 'object',
+          fields: [
+            { name: 'title', title: 'Texte du logo', type: 'string' },
+            { name: 'icon', title: 'Icône', type: 'image' },
+          ],
+        },
+      ],
+    }),
+    defineField({
+      name: 'content',
+      title: 'Texte de la Vignette (Description détaillée)',
+      type: 'array',
+      of: [{ type: 'block' }, { type: 'image' }],
+      hidden: ({ document }) => !document?.isFinal,
+    }),
+
+    // --- FAQ ---
+    defineField({
+      name: 'faqTitle',
+      title: 'Titre de la section FAQ',
+      type: 'string',
+      initialValue: 'Tout savoir sur nos modèles',
+      hidden: ({ document }) => !document?.isFinal,
+    }),
     defineField({
       name: 'faq',
-      title: 'Questions Fréquentes (FAQ)',
+      title: 'Questions Fréquentes',
       type: 'array',
       hidden: ({ document }) => !document?.isFinal,
       of: [
@@ -97,19 +128,42 @@ export const category = defineType({
         },
       ],
     }),
+
+    // --- BOUTON DU BAS ---
+    defineField({
+      name: 'ctaText',
+      title: 'Texte du Bouton (Bas de page)',
+      type: 'string',
+      initialValue: 'En savoir plus sur nos méthodes',
+      hidden: ({ document }) => !document?.isFinal,
+    }),
+    defineField({
+      name: 'ctaLink',
+      title: 'Lien du bouton',
+      type: 'string',
+      description: 'Tapez simplement l\'URL de la page (ex: /a-propos ou /concept)',
+      hidden: ({ document }) => !document?.isFinal,
+    }),
+
+    // --- SEO ---
+    defineField({
+      name: 'metaTitle',
+      title: 'Meta Title (Titre Google)',
+      type: 'string',
+      hidden: ({ document }) => !document?.isFinal,
+    }),
+    defineField({
+      name: 'metaDescription',
+      title: 'Meta Description (Texte Google)',
+      type: 'text',
+      hidden: ({ document }) => !document?.isFinal,
+    }),
+    defineField({
+      name: 'heroImage',
+      title: 'Image d’en-tête (Si besoin)',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({ document }) => !document?.isFinal,
+    }),
   ],
-  preview: {
-    select: {
-      title: 'title',
-      subtitle: 'parent.title',
-      media: 'menuImage',
-    },
-    prepare({ title, subtitle, media }) {
-      return {
-        title,
-        subtitle: subtitle ? `Sous : ${subtitle}` : 'Catégorie Racine',
-        media,
-      }
-    },
-  },
 })

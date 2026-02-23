@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation"; // Ajout pour la redirection de sécurité
 import { client } from "@/sanity/lib/client";
 import { useInvoice } from "@/hooks/use-invoice";
 import { shipOrderAction, resetOrderAction, cancelOrderAction } from "@/app/actions/order-actions"; 
@@ -13,7 +14,7 @@ import {
   DollarSign, Activity
 } from "lucide-react";
 
-// --- TYPES (Pour corriger les erreurs sans casser le code) ---
+// --- TYPES ---
 interface OrderItem {
   productName: string;
   currentStock: number;
@@ -39,10 +40,26 @@ interface Order {
 }
 
 export default function PreparationDashboard() {
-  const { user, isLoaded } = useUser();
-  const role = (user?.publicMetadata as { role?: string })?.role || "prep";
-  const isAdmin = role === "admin";
+  const { user, isLoaded, isSignedIn } = useUser();
+  const router = useRouter();
 
+  // --- SÉCURITÉ : VÉRIFICATION DES RÔLES ---
+  // On récupère le rôle de Clerk, par défaut "client" si non défini
+  const role = (user?.publicMetadata as { role?: string })?.role || "client";
+  const isAdmin = role === "admin";
+  const isPrep = role === "prep";
+
+  // Redirection si l'utilisateur n'est pas autorisé
+  useEffect(() => {
+    if (isLoaded) {
+      if (!isSignedIn || (!isAdmin && !isPrep)) {
+        // Renvoie l'utilisateur à l'accueil
+        router.push("/");
+      }
+    }
+  }, [isLoaded, isSignedIn, isAdmin, isPrep, router]);
+
+  // --- ÉTATS ---
   const [activeTab, setActiveTab] = useState<"flux" | "history" | "finance">("flux");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,8 +105,9 @@ export default function PreparationDashboard() {
   };
 
   useEffect(() => { 
-    if (isLoaded) fetchOrders(); 
-  }, [isLoaded, activeTab]);
+    // Ne charge les données que si l'utilisateur est autorisé
+    if (isLoaded && (isAdmin || isPrep)) fetchOrders(); 
+  }, [isLoaded, activeTab, isAdmin, isPrep]);
 
   // --- CALCULS STATS (LOGIQUE MÉTIER) ---
   const financeStats = useMemo(() => {
@@ -184,7 +202,10 @@ export default function PreparationDashboard() {
     } catch (error) { alert("Erreur mise à jour"); } finally { setIsUpdating(false); }
   };
 
-  if (!isLoaded || loading) return <div className="min-h-screen flex items-center justify-center font-black animate-pulse uppercase italic tracking-widest text-[#111111] bg-white">CHARGEMENT DU QG RENW...</div>;
+  // Si non chargé ou non autorisé, on n'affiche rien (évite les flashs)
+  if (!isLoaded || (!isAdmin && !isPrep)) return null;
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center font-black animate-pulse uppercase italic tracking-widest text-[#111111] bg-white">CHARGEMENT DU QG RENW...</div>;
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] p-4 md:p-10 font-sans text-[#111111] antialiased">

@@ -4,17 +4,10 @@ import { useState, useEffect } from "react";
 import useCart from "@/hooks/use-cart";
 import { useRouter } from "next/navigation";
 import { urlFor } from "@/sanity/lib/image";
-import { createClient } from "next-sanity";
 import { useUser } from "@clerk/nextjs";
 import { client as publicClient } from "@/sanity/lib/client";
-
-const writeClient = createClient({
-  projectId: 'dhd0ohjg',
-  dataset: 'production',
-  apiVersion: '2023-05-03',
-  useCdn: false,
-  token: 'skHzE8RcSjcc1U6upP8VNB96DESkHWXD6KdROXZNBFqYQnqSRwC4EwBCDJXvrC6w8z6e9aihHQONOrE9wUv9Ybnw9pMy1T2rrBEJA4BLYBM8qX9nqUDKwSmiQ75SAQ9vj930pPjyUzWivl1NKObnOKrvt80zDBnIwbBQCZxeuQ00v8dPZie8', 
-});
+// 👇 IMPORT CORRIGÉ ICI 👇
+import { createOrderAction } from "../../actions/checkout-actions";
 
 export default function ShippingPage() {
   const cart = useCart();
@@ -64,24 +57,6 @@ export default function ShippingPage() {
     setLoading(true);
 
     try {
-      if (isSignedIn && user) {
-        const existingCustomer = await publicClient.fetch(
-          `*[_type == "customer" && clerkId == $clerkId][0]`,
-          { clerkId: user.id }
-        );
-
-        if (!existingCustomer) {
-          await writeClient.create({
-            _type: 'customer',
-            clerkId: user.id,
-            email: formData.email,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            phone: formData.phone,
-          });
-        }
-      }
-
       const orderItems = cart.items.map((item: any, index: number) => {
         return {
           _key: `item-${index}-${Date.now()}`,
@@ -112,10 +87,16 @@ export default function ShippingPage() {
         orderDate: new Date().toISOString(),
       };
 
-      const createdOrder = await writeClient.create(orderData);
-      localStorage.setItem("current-order-id", createdOrder._id);
+      // 🚀 APPEL DE LA FONCTION SÉCURISÉE
+      const result = await createOrderAction(orderData, formData, user?.id || null);
+
+      if (result.success && result.orderId) {
+        localStorage.setItem("current-order-id", result.orderId);
+        router.push("/checkout/payment");
+      } else {
+        alert("Erreur: " + result.error);
+      }
       
-      router.push("/checkout/payment");
     } catch (err: any) {
       console.error("ERREUR:", err);
       alert("Erreur lors de la validation.");

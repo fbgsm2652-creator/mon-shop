@@ -35,14 +35,14 @@ export const product = defineType({
         slugify: input => input
                          .toLowerCase()
                          .normalize("NFD")
-                         .replace(/[\u0300-\u036f]/g, "") // Supprime les accents
-                         .replace(/\s+/g, '-') // Remplace les espaces par des tirets
+                         .replace(/[\u0300-\u036f]/g, "")
+                         .replace(/\s+/g, '-')
                          .slice(0, 96)
       },
       validation: (Rule) => Rule.required(),
     }),
 
-    // --- SEO OPTIMISÉ (AVEC WARNINGS GOOGLE) ---
+    // --- SEO OPTIMISÉ ---
     defineField({ name: 'headerScript', title: 'Script Header', type: 'text', group: 'seo', rows: 3 }),
     defineField({ 
       name: 'metaTitle', 
@@ -85,6 +85,13 @@ export const product = defineType({
 
     // --- PRIX & STOCK ---
     defineField({
+      name: 'priceWhenNew',
+      title: 'Prix d\'origine du neuf (Pour afficher le prix barré)',
+      type: 'number',
+      group: 'inventory',
+      description: 'Ex: 817.21 (Permet de calculer l\'économie réalisée)'
+    }),
+    defineField({
       name: 'price',
       title: 'Prix de vente TTC (fixe)',
       type: 'number',
@@ -118,7 +125,8 @@ export const product = defineType({
       of: [{
         type: 'object',
         fields: [
-          { name: 'gradeName', title: 'Nom du Grade', type: 'string' },
+          { name: 'gradeName', title: 'Nom du Grade (ex: Parfait état)', type: 'string' },
+          { name: 'gradeDescription', title: 'Petite description (ex: Presque aucun signe d\'usure)', type: 'string' },
           {
             name: 'capacities',
             title: 'Variantes de stockage',
@@ -126,7 +134,7 @@ export const product = defineType({
             of: [{
               type: 'object',
               fields: [
-                { name: 'storage', title: 'Capacité', type: 'string' },
+                { name: 'storage', title: 'Capacité (ex: 128 Go)', type: 'string' },
                 { name: 'price', title: 'Prix de vente', type: 'number' },
                 { name: 'purchasePrice', title: 'Prix d\'achat', type: 'number' },
                 { name: 'stock', title: 'Stock disponible', type: 'number' },
@@ -137,8 +145,17 @@ export const product = defineType({
       }]
     }),
 
+    // --- LE CROSS-SELL (VENTE CROISÉE) ---
+    defineField({
+      name: 'crossSell',
+      title: 'Produit Complémentaire (Bundle / Cross-sell)',
+      description: 'S\'affichera sous le bouton "Ajouter au panier" (Ex: Coque, chargeur, vitre en verre trempé).',
+      type: 'reference',
+      to: [{ type: 'product' }],
+      group: 'inventory',
+    }),
+
     // --- VISUELS & CONTENU ---
-    // AJOUT SEO : Le champ "alt" pour la mainImage
     defineField({ 
       name: 'mainImage', 
       title: 'Image Principale', 
@@ -146,36 +163,60 @@ export const product = defineType({
       group: 'content', 
       options: { hotspot: true }, 
       fields: [
-        { name: 'alt', title: 'Texte Alternatif (SEO)', type: 'string', description: 'Important pour Google Images (Ex: "iPhone 13 Bleu Reconditionné")' }
+        { name: 'alt', title: 'Texte Alternatif (SEO)', type: 'string', description: 'Important pour Google Images' }
       ],
       validation: (Rule) => Rule.required() 
     }),
     defineField({ name: 'images', title: 'Galerie Photos', type: 'array', group: 'content', of: [{ type: 'image', options: { hotspot: true }, fields: [{ name: 'colorAssoc', title: 'Couleur associée', type: 'string' }, { name: 'alt', title: 'Texte Alternatif (SEO)', type: 'string' }] }] }),
-    defineField({ name: 'shortDescription', title: 'Texte d\'accroche', type: 'text', rows: 2, group: 'content' }),
+    defineField({ name: 'shortDescription', title: 'Texte d\'accroche (Italique)', type: 'text', rows: 2, group: 'content' }),
     
-    // BLOC : ARGUMENTS DE VENTE (RÉASSURANCE)
     defineField({
-      name: 'productFeatures',
-      title: 'Arguments de vente (Réassurance)',
-      description: 'Ajoutez jusqu\'à 3 arguments (ex: "Batterie certifiée", "Garantie 2 ans"). Laissez vide pour ne rien afficher.',
+      name: 'specifications',
+      title: 'Spécifications techniques',
       type: 'array',
       group: 'content',
       of: [{
         type: 'object',
         fields: [
-          { name: 'icon', title: 'Icône (Emoji)', type: 'string', description: 'Ex: 🛡️, 🔋, ⚡, ♻️' },
+          { name: 'label', title: 'Label (ex: Taille écran)', type: 'string' },
+          { name: 'value', title: 'Valeur (ex: 6.2 pouces)', type: 'string' }
+        ]
+      }]
+    }),
+
+    defineField({
+      name: 'productFeatures',
+      title: 'Arguments de vente (Réassurance sous le prix)',
+      type: 'array',
+      group: 'content',
+      of: [{
+        type: 'object',
+        fields: [
+          { 
+            name: 'iconImage', 
+            title: 'Image/Logo', 
+            type: 'image',
+            description: 'Optionnel : Uploadez un logo ou une image (SVG ou PNG transparent recommandé).',
+            options: { hotspot: true }
+          },
+          { 
+            name: 'icon', 
+            title: 'Icône Texte (Emoji)', 
+            type: 'string',
+            description: 'Utilisé si aucune image n\'est fournie (Ex: 🛡️).'
+          },
           { name: 'text', title: 'Texte de l\'argument', type: 'string' }
         ],
         preview: {
-          select: { title: 'text', subtitle: 'icon' },
-          prepare(selection) { return { title: `${selection.subtitle || '✅'} ${selection.title}` } }
+          select: { title: 'text', media: 'iconImage' },
+          prepare(selection) { return { title: selection.title, media: selection.media } }
         }
       }]
     }),
 
     defineField({ name: 'content', title: 'Description détaillée', type: 'array', group: 'content', of: [{ type: 'block' }] }),
     defineField({ name: 'faq', title: 'FAQ Produit', type: 'array', of: [{ type: 'object', fields: [{ name: 'question', title: 'Question', type: 'string' }, { name: 'answer', title: 'Réponse', type: 'text' }] }] }),
-    defineField({ name: 'relatedProducts', title: 'Produits Associés', type: 'array', group: 'content', validation: (Rule) => Rule.max(3), of: [{ type: 'reference', to: [{ type: 'product' }] }] }),
+    defineField({ name: 'relatedProducts', title: 'Produits Associés', type: 'array', group: 'content', validation: (Rule) => Rule.max(4), of: [{ type: 'reference', to: [{ type: 'product' }] }] }),
   ],
   preview: { select: { title: 'name', media: 'mainImage' } }
 })

@@ -1,7 +1,7 @@
 "use client";
 
 import { defineConfig, buildLegacyTheme } from 'sanity';
-import { deskTool } from 'sanity/desk';
+import { structureTool } from 'sanity/structure';
 import { visionTool } from '@sanity/vision';
 import { schema } from './sanity/schemaTypes'; 
 
@@ -44,7 +44,7 @@ export default defineConfig({
   basePath: '/studio', 
 
   plugins: [
-    deskTool(), 
+    structureTool(), 
     visionTool(),
   ],
 
@@ -52,6 +52,5 @@ export default defineConfig({
     types: schema.types,
   },
 
-  // On applique le thème ici
   theme: myTheme,
 })

@@ -13,6 +13,7 @@ export default defineType({
     { name: 'general', title: 'Identité & SEO' },
     { name: 'legal', title: 'Infos Facturation' },
     { name: 'zen', title: 'Paiement ZEN' },
+    { name: 'contact', title: 'Page Contact' }, // 👈 NOUVEL ONGLET AJOUTÉ ICI
   ],
   fields: [
     // --- GROUPE IDENTITÉ & SEO ---
@@ -24,6 +25,22 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'shortName',
+      title: 'Nom court (Pour App Mobile)',
+      type: 'string',
+      group: 'general',
+      description: 'Le nom qui s\'affiche sous l\'icône sur le téléphone (ex: RENW)',
+      initialValue: 'RENW',
+    }),
+    defineField({
+      name: 'themeColor',
+      title: 'Couleur du thème',
+      type: 'string',
+      group: 'general',
+      description: 'Code couleur hexa pour la barre du navigateur mobile (ex: #0066CC)',
+      initialValue: '#0066CC',
+    }),
+    defineField({
       name: 'baseUrl',
       title: 'URL officielle du site',
       type: 'url',
@@ -33,10 +50,10 @@ export default defineType({
     }),
     defineField({
       name: 'favicon',
-      title: 'Favicon',
+      title: 'Favicon / Icône d\'App',
       type: 'image',
       group: 'general',
-      description: 'L\'icône de l\'onglet navigateur.',
+      description: 'L\'icône de l\'onglet navigateur et de l\'application mobile (Format carré recommandé).',
     }),
     defineField({
       name: 'globalSeo',
@@ -45,7 +62,7 @@ export default defineType({
       group: 'general',
       fields: [
         { name: 'metaTitle', title: 'Titre Meta par défaut', type: 'string' },
-        { name: 'metaDescription', title: 'Description Meta par défaut', type: 'text', rows: 3 },
+        { name: 'metaDescription', title: 'Description Meta par défaut', type: 'text' }
       ]
     }),
 
@@ -53,9 +70,8 @@ export default defineType({
     defineField({
       name: 'address',
       title: 'Adresse du siège social',
-      type: 'text',
+      type: 'text', 
       group: 'legal',
-      rows: 2,
       description: 'Cette adresse apparaîtra sur vos factures.',
     }),
     defineField({
@@ -98,6 +114,61 @@ export default defineType({
         layout: 'radio'
       },
       initialValue: 'https://sandbox.zen.com/v1/transactions'
+    }),
+
+    // --- 🚀 NOUVEAU : GROUPE PAGE CONTACT ---
+    defineField({ 
+      name: 'contactPageTitle', 
+      title: 'Gros Titre de la page', 
+      type: 'string', 
+      group: 'contact', 
+      initialValue: 'Comment pouvons-nous vous aider ?' 
+    }),
+    defineField({ 
+      name: 'contactPageSubtitle', 
+      title: 'Sous-titre explicatif', 
+      type: 'text', 
+      group: 'contact' 
+    }),
+    defineField({ 
+      name: 'contactHeading', 
+      title: 'Titre de la colonne gauche', 
+      type: 'string', 
+      group: 'contact', 
+      initialValue: 'Entrons en contact.' 
+    }),
+    defineField({ 
+      name: 'contactEmail', 
+      title: 'Adresse E-mail (Affichage public)', 
+      type: 'string', 
+      group: 'contact' 
+    }),
+    defineField({ 
+      name: 'contactEmailSubtext', 
+      title: 'Sous-texte E-mail', 
+      type: 'string', 
+      group: 'contact',
+      initialValue: 'Nous répondons généralement sous 24h.'
+    }),
+    defineField({ 
+      name: 'contactPhone', 
+      title: 'Numéro de téléphone', 
+      type: 'string', 
+      group: 'contact' 
+    }),
+    defineField({ 
+      name: 'contactPhoneSubtext', 
+      title: 'Sous-texte Téléphone', 
+      type: 'string', 
+      group: 'contact',
+      initialValue: 'Du Lundi au Vendredi, de 9h à 18h.'
+    }),
+    defineField({ 
+      name: 'contactAddress', 
+      title: 'Adresse de contact (Affichage public)', 
+      type: 'text', 
+      group: 'contact',
+      description: 'Peut être identique ou différente de l\'adresse de facturation.'
     }),
   ],
   preview: {

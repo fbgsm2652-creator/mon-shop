@@ -9,8 +9,6 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   const params = await props.params;
   const { slug } = params;
 
-  // CORRECTION CRITIQUE : Retrait du "seo." car les groupes Sanity ne nichent pas les données.
-  // AJOUT : "metaKeywords" pour récupérer les mots-clés.
   const data = await client.fetch(`
     *[slug.current == $slug][0]{
       _type,
@@ -19,7 +17,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
       metaTitle,
       metaDescription,
       metaKeywords,
-      "ogImage": images[0].asset->url
+      "ogImage": coalesce(mainImage.asset->url, images[0].asset->url)
     }
   `, { slug });
 
@@ -55,7 +53,7 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   };
 }
 
-// --- 2. LE COMPOSANT DYNAMIQUE (LOGIQUE DE 104 LIGNES PRÉSERVÉE À 100%) ---
+// --- 2. LE COMPOSANT DYNAMIQUE ---
 export default async function DynamicPage(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   const { slug } = params;
@@ -68,9 +66,19 @@ export default async function DynamicPage(props: { params: Promise<{ slug: strin
       name,
       title,
       "slug": slug.current,
-      "mainImage": images[0],
+      "mainImage": coalesce(mainImage, images[0]), 
       
-      // --- SEO : RÉCUPÉRATION POUR LE BREADCRUMB ---
+      "crossSell": crossSell->{
+        _id,
+        name,
+        isReconditioned,
+        price,
+        mainImage,
+        images,
+        grades,
+        simpleVariants
+      },
+      
       "category": category-> {
         title,
         "slug": slug.current,
@@ -78,24 +86,22 @@ export default async function DynamicPage(props: { params: Promise<{ slug: strin
           _id,
           name,
           "slug": slug,
-          "mainImage": images[0]
+          "mainImage": coalesce(mainImage, images[0])
         }
       },
 
-      // --- UPSELL MANUEL (Bloc Gris - Gardé à 100%) ---
       "relatedProducts": relatedProducts[]->{
         _id,
         name,
         "slug": slug,
-        "mainImage": images[0]
+        "mainImage": coalesce(mainImage, images[0])
       },
 
-      // --- LOGIQUE CATÉGORIE (Inchangée) ---
       "categoryProducts": *[_type == "product" && (category->slug.current == $slug || brand == $slug)] | order(_createdAt desc) {
         _id,
         name,
         "slug": slug.current,
-        "mainImage": images[0].asset->url,
+        "mainImage": coalesce(mainImage.asset->url, images[0].asset->url),
         "minPrice": select(
           isReconditioned == true => grades[0].capacities[0].price,
           price > 0 => price,
@@ -107,7 +113,6 @@ export default async function DynamicPage(props: { params: Promise<{ slug: strin
 
   if (!data) return notFound();
 
-  // --- LOGIQUE BREADCRUMB (L'ajout SEO qui ne casse rien) ---
   const breadcrumbList = [
     { position: 1, name: "Accueil", item: "https://renw.fr" },
   ];
@@ -135,7 +140,6 @@ export default async function DynamicPage(props: { params: Promise<{ slug: strin
 
   return (
     <>
-      {/* Injection SEO invisible pour l'utilisateur */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
@@ -150,7 +154,6 @@ export default async function DynamicPage(props: { params: Promise<{ slug: strin
         }) }}
       />
       
-      {/* Tes composants clients reçoivent exactement les mêmes props qu'avant */}
       {data._type === "product" && <ProductPageClient product={data} />}
       {data._type === "category" && <CategoryPageDisplay category={data} />}
     </>

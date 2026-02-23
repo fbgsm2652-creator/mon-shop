@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
@@ -8,23 +6,22 @@ import { Toaster } from "react-hot-toast";
 import { ClerkProvider } from "@clerk/nextjs"; 
 import { frFR } from "@clerk/localizations"; 
 import { client } from "@/sanity/lib/client"; 
+import { sanityFetch, SanityLive } from "@/sanity/lib/live";
 import Script from "next/script"; 
 import { headers } from "next/headers";
 
-// --- 1. RÉCUPÉRATION DES DONNÉES (HIÉRARCHIE DYNAMIQUE) ---
 async function getNavigationData() {
   const query = `{
-    "categories": *[_type == "category" && !defined(parent)] | order(title asc) {
+    "categories": *[_type == "category" && isParent == true] | order(title asc) {
       _id, 
       title, 
       menuImage,
       "slug": slug.current,
-      "subCategories": *[_type == "category" && references(^._id)] | order(title asc) {
-        _id, 
+      subCategories[] {
         title,
-        "finalModels": *[_type == "category" && references(^._id) && isFinal == true] | order(title asc) {
-          _id, 
-          title, 
+        "finalModels": finalModels[]-> {
+          _id,
+          title,
           "slug": slug.current
         }
       }
@@ -33,10 +30,10 @@ async function getNavigationData() {
     "home": *[_type == "homeSettings"][0]{headerScripts, metaTitle, metaDescription}
   }`;
   
-  return await client.fetch(query, {}, { next: { revalidate: 60 } });
+  const { data } = await sanityFetch({ query });
+  return data;
 }
 
-// --- 2. SEO DYNAMIQUE ---
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await client.fetch(`*[_type == "settings"][0]`);
   const home = await client.fetch(`*[_type == "homeSettings"][0]`);
@@ -54,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s | ${companyName}`
     },
     description: description,
-    keywords: ["iPhone", "reconditionné", "pièces détachées", "RENW"],
+    keywords: ["iPhone", "reconditionné", "pièces détachées", "RENW", "expertise tech"],
     robots: "index, follow",
     manifest: "/manifest.json", 
     openGraph: {
@@ -76,7 +73,6 @@ export const viewport: Viewport = {
   maximumScale: 5, 
 };
 
-// --- 3. STRUCTURE PRINCIPALE ---
 export default async function RootLayout({
   children,
 }: {
@@ -88,10 +84,15 @@ export default async function RootLayout({
 
   const { categories, headerSettings, home } = await getNavigationData();
 
+  const eliteFont = { fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" };
+
   return (
     <ClerkProvider localization={frFR}> 
       <html lang="fr" className="scroll-smooth">
-        <body className="min-h-screen antialiased selection:bg-blue-600/10 selection:text-blue-600 bg-white text-[#111111]" style={{ fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
+        <body 
+          className="min-h-screen antialiased selection:bg-blue-600/10 selection:text-blue-600 bg-white text-[#111111]" 
+          style={eliteFont}
+        >
           <Toaster position="top-center" />
           
           {home?.headerScripts && (
@@ -114,6 +115,8 @@ export default async function RootLayout({
           </main>
           
           {!isStudio && <Footer />}
+
+          <SanityLive /> 
         </body>
       </html>
     </ClerkProvider>
