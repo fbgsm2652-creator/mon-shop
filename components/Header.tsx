@@ -126,7 +126,9 @@ export default function Header({ categories, settings }: HeaderProps) {
         <ul className="max-w-7xl w-full px-4 md:px-6 flex justify-center relative list-none m-0 p-0">
           {categories?.map((parent, index) => (
             <li key={parent._id || `parent-${index}`} className="group flex items-center static">
+              {/* 🔥 SEO OPTI : prefetch={false} sur les catégories principales si on a beaucoup de liens 🔥 */}
               <Link 
+                prefetch={false}
                 href={`/${parent.slug?.current || parent.slug}`} 
                 className="text-[16px] font-normal text-white hover:text-gray-300 transition-colors px-4 py-2.5"
               >
@@ -160,7 +162,9 @@ export default function Header({ categories, settings }: HeaderProps) {
                         <ul className="space-y-4 list-none p-0 m-0">
                           {sub.finalModels?.map((model: any, modelIdx: number) => (
                             <li key={`model-${model._id || 'fallback'}-${subIdx}-${modelIdx}`}>
+                              {/* 🔥 SEO OPTI : prefetch={false} pour libérer le réseau au chargement 🔥 */}
                               <Link 
+                                prefetch={false}
                                 onClick={closeAllMenus}
                                 href={`/${model.slug?.current || model.slug}`} 
                                 className="text-[14px] font-medium text-gray-500 hover:text-[#111111] flex items-center justify-between group/link transition-all"
@@ -182,10 +186,9 @@ export default function Header({ categories, settings }: HeaderProps) {
         </ul>
       </nav>
 
-      {/* 3. BARRE PROMO (CORRIGÉE : Bleu-gris clair doux, texte foncé, minuscule) */}
+      {/* 3. BARRE PROMO */}
       {settings?.promoMessage && (
         <div 
-          // Changement ici : Fond clair (#F1F5F9), texte foncé (#1e293b), retrait de 'uppercase' et 'tracking'
           className="bg-[#F1F5F9] text-[#1e293b] py-2.5 text-center text-[11px] md:text-[12px] font-medium tracking-normal w-full border-t border-gray-100"
           aria-live="polite"
         >
@@ -229,7 +232,8 @@ export default function Header({ categories, settings }: HeaderProps) {
                     <ul className="grid gap-2 list-none m-0 p-0">
                       {sub.finalModels?.map((model: any, mIdx: number) => (
                         <li key={`mobile-model-${model._id || 'fallback'}-${subIdx}-${mIdx}`}>
-                          <Link href={`/${model.slug?.current || model.slug}`} onClick={closeAllMenus} className="flex items-center justify-between bg-white border border-gray-100 p-4 rounded-xl font-bold text-[14px] text-[#111111] shadow-sm">
+                          {/* 🔥 SEO OPTI : prefetch={false} VITALE POUR LE SCORE MOBILE 🔥 */}
+                          <Link prefetch={false} href={`/${model.slug?.current || model.slug}`} onClick={closeAllMenus} className="flex items-center justify-between bg-white border border-gray-100 p-4 rounded-xl font-bold text-[14px] text-[#111111] shadow-sm">
                             {model.title} <ArrowRight size={16} className="text-[#475569]" />
                           </Link>
                         </li>

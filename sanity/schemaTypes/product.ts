@@ -64,9 +64,10 @@ export const product = defineType({
     // --- CONFIGURATION ---
     defineField({
       name: 'isReconditioned',
-      title: 'Produit Reconditionné ?',
+      title: 'Produit Reconditionné / Téléphone ?',
       type: 'boolean',
       initialValue: true,
+      description: 'Cochez pour un téléphone avec des grades (ex: Comme Neuf). Décochez pour une pièce détachée ou accessoire (ex: Écran, Batterie).',
     }),
     defineField({
       name: 'colors',
@@ -99,34 +100,72 @@ export const product = defineType({
       hidden: ({ document }) => !!document?.isReconditioned || (document?.simpleVariants as any[])?.length > 0,
     }),
     
+    // VARIANTES SIMPLES (Ex: Écran OLED vs Incell)
     defineField({
       name: 'simpleVariants',
-      title: 'Variantes de produit (ex: Original vs Compatible)',
+      title: 'Variantes de produit (ex: Qualité Écran)',
       type: 'array',
       group: 'inventory',
       hidden: ({ document }) => !!document?.isReconditioned,
       of: [{
         type: 'object',
         fields: [
-          { name: 'variantName', title: 'Nom (ex: Original)', type: 'string' },
+          { name: 'variantName', title: 'Nom (ex: OLED Soft)', type: 'string' },
           { name: 'price', title: 'Prix TTC', type: 'number' },
           { name: 'stock', title: 'Stock', type: 'number' },
           { name: 'purchasePrice', title: 'Prix d\'achat', type: 'number' },
+          
+          // 🔥 VOLET EXPLICATIF 100% PERSONNALISABLE POUR VARIANTES SIMPLES 🔥
+          { name: 'drawerTitle', title: 'Titre principal du Volet (ex: Guide des Écrans)', type: 'string' },
+          { name: 'drawerSubtitle', title: 'Sous-titre (Sous le nom du produit)', type: 'string' },
+          { name: 'drawerImage', title: 'Image spécifique dans le volet (Optionnel)', type: 'image', options: { hotspot: true } },
+          { 
+            name: 'drawerDescription', 
+            title: 'Description détaillée (Texte principal du volet)', 
+            type: 'text', 
+            rows: 3 
+          },
+          {
+            name: 'drawerChecklist',
+            title: 'Points forts (Bloc Gris avec coche bleue)',
+            type: 'array',
+            of: [{ type: 'string' }],
+            description: 'Ex: Luminosité maximale, Tactile ultra-réactif...'
+          }
         ]
       }]
     }),
 
+    // GRADES RECONDITIONNÉS (Ex: Téléphones)
     defineField({
       name: 'grades',
-      title: 'Configuration Reconditionnée',
+      title: 'Configuration Reconditionnée (Grades)',
       type: 'array',
       group: 'inventory',
       hidden: ({ document }) => !document?.isReconditioned,
       of: [{
         type: 'object',
         fields: [
-          { name: 'gradeName', title: 'Nom du Grade (ex: Parfait état)', type: 'string' },
-          { name: 'gradeDescription', title: 'Petite description (ex: Presque aucun signe d\'usure)', type: 'string' },
+          { name: 'gradeName', title: 'Nom du Grade (ex: Comme neuf)', type: 'string' },
+          { name: 'gradeDescription', title: 'Petite description sous le bouton (ex: Écran parfait)', type: 'string' },
+          
+          // 🔥 VOLET EXPLICATIF 100% PERSONNALISABLE POUR GRADES 🔥
+          { name: 'drawerTitle', title: 'Titre principal du Volet (ex: Guide des États)', type: 'string' },
+          { name: 'drawerSubtitle', title: 'Sous-titre (Sous le nom du produit)', type: 'string' },
+          { name: 'drawerImage', title: 'Image spécifique dans le volet (Optionnel)', type: 'image', options: { hotspot: true } },
+          { 
+            name: 'drawerDescription', 
+            title: 'Description détaillée (Texte principal du volet)', 
+            type: 'text', 
+            rows: 3 
+          },
+          {
+            name: 'drawerChecklist',
+            title: 'Points forts (Bloc Gris avec coche bleue)',
+            type: 'array',
+            of: [{ type: 'string' }],
+            description: 'Ex: Batterie testée > 85%, Débloqué tout opérateur...'
+          },
           {
             name: 'capacities',
             title: 'Variantes de stockage',
@@ -145,13 +184,13 @@ export const product = defineType({
       }]
     }),
 
-    // --- LE CROSS-SELL (VENTE CROISÉE) ---
+    // --- LE CROSS-SELL (VENTE CROISÉE) MODIFIÉ EN ARRAY ---
     defineField({
       name: 'crossSell',
-      title: 'Produit Complémentaire (Bundle / Cross-sell)',
-      description: 'S\'affichera sous le bouton "Ajouter au panier" (Ex: Coque, chargeur, vitre en verre trempé).',
-      type: 'reference',
-      to: [{ type: 'product' }],
+      title: 'Produits Complémentaires (Pack d\'Accessoires)',
+      description: 'Sélectonnez un ou plusieurs accessoires (Coque, Vitre, Chargeur). Ils s\'afficheront sous forme de pack à ajouter au panier.',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'product' }] }],
       group: 'inventory',
     }),
 

@@ -68,7 +68,8 @@ export default async function DynamicPage(props: { params: Promise<{ slug: strin
       "slug": slug.current,
       "mainImage": coalesce(mainImage, images[0]), 
       
-      "crossSell": crossSell->{
+      // 🔥 NOUVEAU : On récupère la LISTE des ventes croisées (array)
+      "crossSell": crossSell[]->{
         _id,
         name,
         isReconditioned,
@@ -82,7 +83,7 @@ export default async function DynamicPage(props: { params: Promise<{ slug: strin
       "category": category-> {
         title,
         "slug": slug.current,
-        // 🔥 SEO MAILLAGE VERTICAL : On charge TOUS les produits associés avec leur prix pour le composant
+        // 🔥 SEO MAILLAGE VERTICAL
         "relatedProducts": *[_type == "product" && references(^._id) && slug.current != $slug] | order(_createdAt desc) {
           _id,
           name,
@@ -103,7 +104,7 @@ export default async function DynamicPage(props: { params: Promise<{ slug: strin
         "mainImage": coalesce(mainImage, images[0])
       },
 
-      // 🔥 SEO MAILLAGE HORIZONTAL : On récupère les best-sellers définis dans la page d'accueil
+      // 🔥 SEO MAILLAGE HORIZONTAL
       "bestSellers": *[_type == "homeSettings"][0].bestSellers[]->{
         _id,
         name,

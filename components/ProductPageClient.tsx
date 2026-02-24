@@ -6,7 +6,7 @@ import { urlFor } from "@/sanity/lib/image";
 import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
-import { ChevronRight, Plus } from "lucide-react";
+import { ChevronRight, Plus, X, Info } from "lucide-react";
 
 // --- ICÔNES ---
 const ShoppingCartIcon = ({ className }: { className?: string }) => (
@@ -26,8 +26,11 @@ export default function ProductPageClient({ product }: { product: any }) {
   const [userHasSelectedColor, setUserHasSelectedColor] = useState(false);
   const [showModal, setShowModal] = useState(false);
   
+  // Nouveaux états pour le Volet "Détails de l'état"
+  const [infoDrawerOpen, setInfoDrawerOpen] = useState(false);
+  const [viewedGrade, setViewedGrade] = useState<any>(null);
+
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
-  
   const addToCartRef = useRef<HTMLButtonElement>(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
 
@@ -73,19 +76,20 @@ export default function ProductPageClient({ product }: { product: any }) {
 
   const allImages = [displayImage, ...(product.images || [])].filter((v, i, a) => a.findIndex(t => (t.asset?._ref === v.asset?._ref)) === i);
 
-  const crossSellProduct = product.crossSell;
-  let crossSellPrice = 0;
-  if (crossSellProduct) {
-    if (crossSellProduct.isReconditioned) {
-      crossSellPrice = crossSellProduct.grades?.[0]?.capacities?.[0]?.price || 0;
-    } else if (crossSellProduct.simpleVariants && crossSellProduct.simpleVariants.length > 0) {
-      crossSellPrice = crossSellProduct.simpleVariants[0]?.price || 0;
-    } else {
-      crossSellPrice = crossSellProduct.price || 0;
-    }
-  }
+  // 🔥 GESTION DES VENTES CROISÉES MULTIPLES (Pack) 🔥
+  const crossSellProducts = Array.isArray(product.crossSell) ? product.crossSell : (product.crossSell ? [product.crossSell] : []);
+  
+  const validCrossSells = crossSellProducts.map((cs: any) => {
+      let p = 0;
+      if (cs.isReconditioned) p = cs.grades?.[0]?.capacities?.[0]?.price || 0;
+      else if (cs.simpleVariants && cs.simpleVariants.length > 0) p = cs.simpleVariants[0]?.price || 0;
+      else p = cs.price || 0;
+      return { ...cs, computedPrice: p };
+  }).filter((cs: any) => cs.computedPrice > 0);
 
-  const bundlePrice = unitPrice + crossSellPrice;
+  const totalCrossSellPrice = validCrossSells.reduce((acc: number, curr: any) => acc + curr.computedPrice, 0);
+  const bundlePrice = unitPrice + totalCrossSellPrice;
+
   const siteFont = { fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" };
   
   const structuredData = {
@@ -136,17 +140,29 @@ export default function ProductPageClient({ product }: { product: any }) {
       quantity: 1
     });
 
-    if (includeCrossSell && crossSellProduct) {
-       cart.addItem({
-         _id: crossSellProduct._id,
-         name: crossSellProduct.name,
-         price: crossSellPrice,
-         images: [crossSellProduct.mainImage ? urlFor(crossSellProduct.mainImage).url() : ""],
-         quantity: 1
+    if (includeCrossSell && validCrossSells.length > 0) {
+       validCrossSells.forEach((cs: any) => {
+           cart.addItem({
+             _id: cs._id,
+             name: cs.name,
+             price: cs.computedPrice,
+             images: [cs.mainImage ? urlFor(cs.mainImage).url() : ""],
+             quantity: 1
+           });
        });
     }
 
     setShowModal(true);
+  };
+
+  const onAddSingleCrossSell = (cs: any) => {
+    cart.addItem({
+      _id: cs._id,
+      name: cs.name,
+      price: cs.computedPrice,
+      images: [cs.mainImage ? urlFor(cs.mainImage).url() : ""],
+      quantity: 1
+    });
   };
 
   const addToCartBtnClass = "bg-[#111111] text-white px-5 md:px-8 py-3.5 md:py-4 rounded-xl text-[12px] md:text-[15px] uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center shrink-0 min-w-0 shadow-[0_4px_15px_rgba(0,0,0,0.2)]";
@@ -156,6 +172,86 @@ export default function ProductPageClient({ product }: { product: any }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       {product.headerScript && <Script id="product-js" strategy="afterInteractive">{product.headerScript}</Script>}
 
+      {/* 🔥 VOLET LATÉRAL (DRAWER) POUR DÉTAILS DE L'ÉTAT 🔥 */}
+      <>
+        {/* Overlay sombre en arrière-plan */}
+        <div 
+          className={`fixed inset-0 bg-[#111111]/40 backdrop-blur-sm z-[2500] transition-opacity duration-500 ${infoDrawerOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"}`}
+          onClick={() => setInfoDrawerOpen(false)}
+        />
+        {/* Le Volet qui glisse de la gauche */}
+        <div className={`fixed top-[60px] md:top-[128px] left-0 bottom-0 w-[90%] sm:w-[400px] md:w-[450px] bg-white z-[2501] shadow-[30px_0_60px_rgba(0,0,0,0.15)] transition-transform duration-500 ease-[cubic-bezier(0.5,0,0.2,1)] flex flex-col ${infoDrawerOpen ? "translate-x-0" : "-translate-x-full"}`}>
+          {/* En-tête du volet */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-[#F8FAFC]">
+             <h3 className="text-[18px] font-black tracking-tight text-[#111111] uppercase">Guide d'information</h3>
+             <button onClick={() => setInfoDrawerOpen(false)} className="p-2 hover:bg-gray-200 bg-white shadow-sm rounded-full transition-colors text-gray-600">
+               <X size={20}/>
+             </button>
+          </div>
+          
+          {/* Contenu du volet */}
+          <div className="flex-1 overflow-y-auto p-6">
+             {viewedGrade && (
+               <div className="flex flex-col items-center">
+                 {/* Petite photo du produit */}
+                 <div className="w-32 h-32 relative bg-white border border-gray-100 rounded-2xl p-3 shadow-sm mb-6">
+                   {displayImage && <Image src={urlFor(displayImage).url()} fill sizes="128px" className="object-contain mix-blend-multiply" alt={product.name} />}
+                 </div>
+                 
+                 {/* Ligne de séparation */}
+                 <div className="w-16 h-1 bg-[#0066CC] rounded-full mb-6" />
+
+                 {/* Titre dynamique */}
+                 <h4 className="text-[22px] font-black text-center text-[#111111] mb-4 leading-tight">
+                   {product.name} <br/>
+                   <span className="text-[#0066CC] font-bold text-[18px]">{viewedGrade.gradeName}</span>
+                 </h4>
+
+                 {/* Texte descriptif SEO */}
+                 <div className="text-[15px] text-gray-600 font-medium text-center mb-8 leading-relaxed">
+                   <p>{viewedGrade.drawerDescription || viewedGrade.gradeDescription || "Nos experts ont rigoureusement testé et validé cet appareil pour vous garantir des performances optimales."}</p>
+                 </div>
+
+                 {/* Arguments de rassurance */}
+                 <div className="w-full space-y-4 bg-[#F8FAFC] p-6 rounded-2xl border border-gray-100">
+                   {(viewedGrade.drawerChecklist && viewedGrade.drawerChecklist.length > 0) ? (
+                     viewedGrade.drawerChecklist.map((point: string, idx: number) => (
+                       <div key={idx} className="flex items-start gap-3">
+                         <span className="text-[#0066CC] mt-0.5 font-black text-[16px]">✓</span>
+                         <p className="text-[14px] font-bold text-[#111111]">{point}</p>
+                       </div>
+                     ))
+                   ) : (
+                     <>
+                       <div className="flex items-start gap-3">
+                         <span className="text-[#0066CC] mt-0.5 font-black text-[16px]">✓</span>
+                         <p className="text-[14px] font-bold text-[#111111]">100% Fonctionnel</p>
+                       </div>
+                       <div className="flex items-start gap-3">
+                         <span className="text-[#0066CC] mt-0.5 font-black text-[16px]">✓</span>
+                         <p className="text-[14px] font-bold text-[#111111]">Testé sur plus de 40 points de contrôle</p>
+                       </div>
+                       <div className="flex items-start gap-3">
+                         <span className="text-[#0066CC] mt-0.5 font-black text-[16px]">✓</span>
+                         <p className="text-[14px] font-bold text-[#111111]">Nettoyage et désinfection complète</p>
+                       </div>
+                     </>
+                   )}
+                 </div>
+               </div>
+             )}
+          </div>
+
+          {/* Bouton de fermeture en bas */}
+          <div className="p-6 border-t border-gray-100 bg-white">
+             <button onClick={() => setInfoDrawerOpen(false)} className="w-full bg-[#111111] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-[13px] shadow-lg hover:bg-[#0066CC] transition-all">
+               J'ai compris
+             </button>
+          </div>
+        </div>
+      </>
+
+      {/* 🔥 POPUP AJOUT PANIER (Déjà existante) 🔥 */}
       {showModal && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-[#111111]/70 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white rounded-[1.5rem] p-6 md:p-8 max-w-lg w-full shadow-2xl relative animate-in zoom-in duration-300 text-[#111111]">
@@ -166,18 +262,18 @@ export default function ProductPageClient({ product }: { product: any }) {
               </div>
               <h2 className="text-[24px] mb-2 leading-tight text-[#111111]">Ajouté au panier</h2>
               <div className="flex items-center gap-2 mb-6">
-                <span className="text-[#0066CC] text-[22px]">{unitPrice}€</span>
+                <span className="text-[#0066CC] text-[22px] font-bold">{unitPrice}€</span>
               </div>
               <div className="w-full flex flex-col gap-3">
                 <Link href="/panier" className={addToCartBtnClass}>Passer à la caisse</Link>
-                <button onClick={() => setShowModal(false)} className="w-full bg-white border border-[#111111] text-[#111111] py-3.5 md:py-4 rounded-xl text-[13px] md:text-[14px] hover:bg-gray-50 transition-all uppercase tracking-widest">Continuer mes achats</button>
+                <button onClick={() => setShowModal(false)} className="w-full bg-white border border-[#111111] text-[#111111] py-3.5 md:py-4 rounded-xl text-[13px] md:text-[14px] font-bold hover:bg-gray-50 transition-all uppercase tracking-widest">Continuer mes achats</button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* 🔥 Sticky Bar avec sizes="50px" appliqué */}
+      {/* Sticky Bar avec sizes="50px" appliqué */}
       <div className={`fixed bottom-0 left-0 right-0 w-full z-[100] bg-white/95 backdrop-blur-xl border-t border-gray-200 p-3 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] transition-transform duration-500 ease-[cubic-bezier(0.5,0,0.2,1)] ${showStickyBar ? "translate-y-0" : "translate-y-full"}`}>
         <div className="max-w-7xl mx-auto px-2 flex items-center justify-between gap-3 w-full box-border">
           <div className="hidden md:flex items-center gap-4">
@@ -185,14 +281,14 @@ export default function ProductPageClient({ product }: { product: any }) {
               {displayImage && <Image src={urlFor(displayImage).url()} fill sizes="50px" className="object-cover mix-blend-multiply" alt="Miniature" />}
             </div>
             <div className="flex flex-col">
-              <span className="text-[15px] leading-tight line-clamp-1 max-w-[300px] text-[#111111]">{product.name}</span>
-              <span className="text-[13px] text-[#111111] opacity-70">{currentColor || 'Standard'}</span>
+              <span className="text-[15px] leading-tight line-clamp-1 max-w-[300px] font-bold text-[#111111]">{product.name}</span>
+              <span className="text-[13px] text-[#111111] opacity-70 font-medium">{currentColor || 'Standard'}</span>
             </div>
           </div>
           <div className="flex items-center justify-between w-full md:w-auto md:justify-end gap-4 md:gap-6 min-w-0">
             <div className="flex flex-col text-left md:text-right shrink-0">
-              <span className="text-[22px] md:text-[26px] text-[#111111] leading-none">{unitPrice}€</span>
-              {priceWhenNew > 0 && <span className="text-[12px] text-[#111111] opacity-60 line-through mt-0.5">Neuf: {priceWhenNew}€</span>}
+              <span className="text-[22px] md:text-[26px] font-bold text-[#111111] leading-none">{unitPrice}€</span>
+              {priceWhenNew > 0 && <span className="text-[12px] text-[#111111] opacity-60 line-through mt-0.5 font-medium">Neuf: {priceWhenNew}€</span>}
             </div>
             <button onClick={() => onAddToCart(false)} className={addToCartBtnClass}>
               <ShoppingCartIcon /> <span className="truncate">Ajouter au panier</span>
@@ -203,7 +299,7 @@ export default function ProductPageClient({ product }: { product: any }) {
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4 md:pt-6">
         
-        <nav aria-label="Fil d'Ariane" className="hidden md:block mb-6 text-[13px] text-[#111111] opacity-60">
+        <nav aria-label="Fil d'Ariane" className="hidden md:block mb-6 text-[13px] text-[#111111] opacity-60 font-medium">
           <ol className="flex items-center gap-2">
             <li><Link href="/" className="hover:opacity-100 transition-colors">Accueil</Link></li>
             <ChevronRight size={14} className="stroke-1" />
@@ -221,7 +317,7 @@ export default function ProductPageClient({ product }: { product: any }) {
           
           <div className="lg:col-span-6 xl:col-span-7 lg:sticky lg:top-24 relative w-full overflow-hidden">
              
-             <div className="md:hidden mb-4 text-[12px] text-[#111111] opacity-60 flex items-center gap-1">
+             <div className="md:hidden mb-4 text-[12px] text-[#111111] font-medium opacity-60 flex items-center gap-1">
                 <Link href="/">Accueil</Link>
                 <ChevronRight size={12} className="stroke-1" />
                 <span className="truncate opacity-100">{product.category?.title || product.category?.name || "Produit"}</span>
@@ -268,26 +364,25 @@ export default function ProductPageClient({ product }: { product: any }) {
                   </div>
                 )}
              </div>
-
           </div>
 
           <div className="lg:col-span-6 xl:col-span-5 flex flex-col w-full overflow-hidden max-w-full box-border">
             
             <div className="mb-4">
-              <h1 className="text-[26px] md:text-[32px] leading-tight text-[#111111] mb-1">
+              <h1 className="text-[26px] md:text-[32px] font-bold tracking-tight leading-tight text-[#111111] mb-1">
                 {product.name}
               </h1>
-              <div className="text-[14px] text-[#111111] opacity-70">
+              <div className="text-[14px] font-medium text-[#111111] opacity-70">
                 {isReconditioned ? product.grades?.[selectedVariant]?.capacities?.[selectedCap]?.storage : ""} {isReconditioned && currentColor && "•"} {currentColor}
               </div>
             </div>
 
             <div className="bg-white rounded-2xl p-3 md:p-4 mb-5 shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-gray-100 flex flex-row items-center justify-between gap-3 w-full box-border">
               <div className="flex flex-col gap-0 shrink-0">
-                <span className="text-[26px] md:text-[32px] leading-none text-[#111111]">{unitPrice}€</span>
-                {priceWhenNew > 0 && <span className="text-[12px] md:text-[13px] text-[#111111] opacity-60 line-through mt-0.5">Neuf {priceWhenNew}€</span>}
+                <span className="text-[26px] md:text-[32px] font-bold leading-none text-[#111111]">{unitPrice}€</span>
+                {priceWhenNew > 0 && <span className="text-[12px] md:text-[13px] text-[#111111] opacity-60 font-medium line-through mt-0.5">Neuf {priceWhenNew}€</span>}
                 {savings > 0 && (
-                  <span className="text-[#0A5C2F] text-[10px] mt-1 px-1.5 py-0.5 rounded border border-[#0A5C2F]/20 bg-[#D9EFD5]/40 w-fit">
+                  <span className="text-[#0A5C2F] font-bold text-[10px] mt-1 px-2 py-0.5 rounded-md border border-[#0A5C2F]/20 bg-[#D9EFD5]/40 w-fit">
                     Éco {savings.toFixed(2)}€
                   </span>
                 )}
@@ -297,45 +392,72 @@ export default function ProductPageClient({ product }: { product: any }) {
               </button>
             </div>
 
-            {crossSellProduct && (
-              <div className="mb-6 bg-white border border-gray-100 rounded-2xl p-4 shadow-[0_10px_40px_rgba(0,0,0,0.08)] w-full box-border">
-                <h2 className="text-[14px] mb-3 text-[#111111] font-semibold">Souvent achetés ensemble</h2>
-                <div className="flex items-center gap-3 w-full">
-                  <div className="w-12 h-12 shrink-0 bg-[#F5F5F7] rounded-lg relative overflow-hidden p-1.5">
-                     {displayImage && <Image src={typeof displayImage === 'string' ? displayImage : urlFor(displayImage).url()} fill sizes="60px" className="object-contain mix-blend-multiply" alt="Produit principal" />}
-                  </div>
-                  <Plus className="text-[#111111] shrink-0 opacity-40" size={16} />
-                  <div className="w-12 h-12 shrink-0 bg-[#F5F5F7] rounded-lg relative overflow-hidden p-1.5">
-                     {crossSellProduct.mainImage && <Image src={typeof crossSellProduct.mainImage === 'string' ? crossSellProduct.mainImage : urlFor(crossSellProduct.mainImage).url()} fill sizes="60px" className="object-contain mix-blend-multiply" alt={crossSellProduct.name} />}
-                  </div>
-                  <div className="flex flex-col ml-1 min-w-0 flex-1">
-                     <span className="text-[12px] md:text-[13px] leading-tight line-clamp-2 text-[#111111] break-words">{crossSellProduct.name}</span>
-                  </div>
+            {/* 🔥 BLOC DE VENTES CROISÉES (LISTE VERTICALE INDIVIDUELLE) 🔥 */}
+            {validCrossSells.length > 0 && (
+              <div className="mb-6 bg-white border border-[#E5F0FF] rounded-2xl p-4 md:p-5 shadow-[0_10px_40px_rgba(0,102,204,0.05)] w-full box-border">
+                <h2 className="text-[16px] md:text-[18px] mb-4 text-[#111111] font-bold tracking-tight">Souvent achetés ensemble</h2>
+                
+                <div className="flex flex-col gap-3 mb-5">
+                  {validCrossSells.map((cs: any, index: number) => (
+                    <div key={cs._id || index} className="flex items-center justify-between gap-3 bg-[#F8FAFC] p-3 rounded-xl border border-gray-100 transition-colors hover:border-gray-200">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 bg-white rounded-lg relative overflow-hidden p-1.5 border border-gray-100 shadow-sm">
+                           {cs.mainImage && <Image src={typeof cs.mainImage === 'string' ? cs.mainImage : urlFor(cs.mainImage).url()} fill sizes="60px" className="object-contain mix-blend-multiply" alt={cs.name} />}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[13px] md:text-[14px] font-bold text-[#111111] leading-tight line-clamp-2">{cs.name}</span>
+                          <span className="text-[12px] md:text-[13px] text-[#0066CC] font-bold">{cs.computedPrice}€</span>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => onAddSingleCrossSell(cs)} 
+                        aria-label={`Ajouter ${cs.name}`}
+                        className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded-full text-[#111111] hover:bg-[#0066CC] hover:text-white hover:border-[#0066CC] transition-colors shrink-0 shadow-sm"
+                      >
+                        <Plus size={16} strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                <div className="mt-4 pt-4 border-t border-gray-100 flex flex-row items-center justify-between gap-2 flex-wrap w-full">
-                   <div className="text-[13px] text-[#111111]">Total: <span>{bundlePrice}€</span></div>
-                   <button onClick={() => onAddToCart(true)} className="bg-[#0066CC] text-white py-2.5 px-4 rounded-xl text-[11px] md:text-[12px] uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center shrink-0 whitespace-nowrap shadow-md shadow-blue-200">
-                     <ShoppingCartIcon className="w-4 h-4 mr-1.5 text-white" /> L'ensemble
+
+                <div className="pt-4 border-t border-gray-100 flex flex-row items-center justify-between gap-2 flex-wrap w-full">
+                   <div className="text-[13px] md:text-[14px] text-[#111111] font-medium">Prix total (Pack): <span className="font-bold text-[18px] md:text-[20px] text-[#0066CC] block md:inline md:ml-2">{bundlePrice}€</span></div>
+                   
+                   <button onClick={() => onAddToCart(true)} className="bg-[#0066CC] hover:opacity-90 text-white py-3 px-5 rounded-xl text-[11px] md:text-[12px] font-bold uppercase tracking-widest transition-all flex items-center justify-center shrink-0 whitespace-nowrap shadow-lg shadow-blue-200">
+                     <ShoppingCartIcon className="w-4 h-4 mr-1.5 text-white" /> Tout Ajouter
                    </button>
                 </div>
               </div>
             )}
 
-            <div className="space-y-5 mb-6 w-full box-border">
+            <div className="space-y-6 mb-6 w-full box-border">
               {isReconditioned ? (
                 <>
                   <fieldset className="w-full">
-                    <legend className="text-[15px] mb-2 text-[#111111]">Condition</legend>
+                    <legend className="text-[16px] md:text-[18px] font-bold mb-3 text-[#111111] tracking-tight">Condition</legend>
                     <div className="grid grid-cols-2 gap-3 w-full">
                       {product.grades?.map((g: any, i: number) => {
                         const gradePrice = g.capacities?.[selectedCap]?.price || 0;
                         return (
                           <label key={i} className="group relative block cursor-pointer w-full">
                             <input type="radio" name="grade" className="peer sr-only" checked={selectedVariant === i} onChange={() => { setSelectedVariant(i); setSelectedCap(0); }} />
-                            <div className="h-full w-full rounded-xl border border-transparent bg-white p-3 transition-all hover:shadow-[0_4px_15px_rgba(0,102,204,0.12)] peer-checked:border-[#0066CC] peer-checked:bg-[#F4F9FF] peer-checked:shadow-[0_4px_15px_rgba(0,102,204,0.2)] shadow-[0_6px_20px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center text-center">
-                              <span className="text-[13px] md:text-[14px] text-[#111111] leading-tight mb-1 break-words w-full">{g.gradeName}</span>
-                              <span className="text-[12px] text-[#111111] mb-1">{gradePrice}€</span>
-                              {g.gradeDescription && <span className="text-[10px] text-[#111111] opacity-60 leading-tight line-clamp-2">{g.gradeDescription}</span>}
+                            
+                            <div className="h-full w-full rounded-xl border-2 border-transparent bg-[#F8FAFC] p-3 md:p-4 transition-all hover:shadow-md peer-checked:border-[#0066CC] peer-checked:bg-[#F4F9FF] peer-checked:shadow-[0_4px_15px_rgba(0,102,204,0.2)] shadow-sm flex flex-col items-center justify-center text-center relative">
+                              
+                              <span className="text-[14px] md:text-[16px] font-bold text-[#111111] leading-tight mb-1 break-words w-full">{g.gradeName}</span>
+                              <span className="text-[13px] md:text-[14px] font-semibold text-gray-700 mb-1">{gradePrice}€</span>
+                              {g.gradeDescription && <span className="text-[11px] text-gray-500 font-medium leading-tight line-clamp-2 mt-1">{g.gradeDescription}</span>}
+
+                              {/* 🔥 BOUTON DÉTAILS - Position exacte à 3px des bords 🔥 */}
+                              <button 
+                                type="button"
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setViewedGrade({ ...g, gradeName: g.gradeName }); setInfoDrawerOpen(true); }}
+                                className="absolute bottom-[3px] right-[3px] text-[#0066CC] hover:bg-[#0066CC] hover:text-white flex items-center gap-1 bg-white px-1.5 py-0.5 md:px-2 md:py-1 rounded-md shadow-sm border border-[#0066CC]/20 transition-all z-10"
+                              >
+                                <Info size={12} strokeWidth={2.5} />
+                                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-wider">Détails</span>
+                              </button>
+
                             </div>
                           </label>
                         );
@@ -344,14 +466,15 @@ export default function ProductPageClient({ product }: { product: any }) {
                   </fieldset>
 
                   <fieldset className="w-full">
-                    <legend className="text-[15px] mb-2 text-[#111111]">Capacité</legend>
+                    <legend className="text-[16px] md:text-[18px] font-bold mb-3 text-[#111111] tracking-tight">Capacité</legend>
                     <div className="grid grid-cols-3 gap-3 w-full">
                       {product.grades?.[selectedVariant]?.capacities?.map((cap: any, i: number) => (
                         <label key={i} className="group relative block cursor-pointer w-full">
                           <input type="radio" name="storage" className="peer sr-only" checked={selectedCap === i} onChange={() => setSelectedCap(i)} />
-                          <div className="h-14 w-full rounded-xl border border-transparent bg-white p-1 transition-all hover:shadow-[0_4px_15px_rgba(0,102,204,0.12)] peer-checked:border-[#0066CC] peer-checked:bg-[#F4F9FF] peer-checked:shadow-[0_4px_15px_rgba(0,102,204,0.2)] shadow-[0_6px_20px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center text-center">
-                            <span className="text-[13px] md:text-[14px] text-[#111111] leading-none mb-1 break-words">{cap.storage}</span>
-                            <span className="text-[11px] md:text-[12px] text-[#111111] leading-none">{cap.price}€</span>
+                          {/* 🔥 BOUTON CAPACITÉ FIN - min-h-[44px] pour correspondre aux couleurs 🔥 */}
+                          <div className="min-h-[44px] md:min-h-[48px] w-full rounded-xl border-2 border-transparent bg-[#F8FAFC] py-1.5 px-1 transition-all hover:shadow-md peer-checked:border-[#0066CC] peer-checked:bg-[#F4F9FF] peer-checked:shadow-[0_4px_15px_rgba(0,102,204,0.2)] shadow-sm flex flex-col items-center justify-center text-center leading-tight">
+                            <span className="text-[13px] md:text-[15px] font-bold text-[#111111] leading-none mb-1 break-words">{cap.storage}</span>
+                            <span className="text-[11px] md:text-[12px] font-semibold text-gray-600 leading-none">{cap.price}€</span>
                           </div>
                         </label>
                       ))}
@@ -361,14 +484,26 @@ export default function ProductPageClient({ product }: { product: any }) {
               ) : (
                 product.simpleVariants && product.simpleVariants.length > 0 && (
                   <fieldset className="w-full">
-                    <legend className="text-[15px] mb-2 text-[#111111]">Modèle</legend>
+                    <legend className="text-[16px] md:text-[18px] font-bold mb-3 text-[#111111] tracking-tight">Modèle</legend>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
                       {product.simpleVariants.map((v: any, i: number) => (
                         <label key={i} className="group relative block cursor-pointer w-full">
                           <input type="radio" name="variant" className="peer sr-only" checked={selectedSimpleVar === i} onChange={() => setSelectedSimpleVar(i)} />
-                          <div className="rounded-xl border border-transparent bg-white p-3 transition-all hover:shadow-[0_4px_15px_rgba(0,102,204,0.12)] peer-checked:border-[#0066CC] peer-checked:bg-[#F4F9FF] peer-checked:shadow-[0_4px_15px_rgba(0,102,204,0.2)] shadow-[0_6px_20px_rgba(0,0,0,0.06)] flex flex-col items-center text-center">
-                            <span className="text-[14px] text-[#111111] mb-1">{v.variantName}</span>
-                            <span className="text-[13px] text-[#111111]">{v.price}€</span>
+                          
+                          <div className="h-full w-full rounded-xl border-2 border-transparent bg-[#F8FAFC] p-3 md:p-4 transition-all hover:shadow-md peer-checked:border-[#0066CC] peer-checked:bg-[#F4F9FF] peer-checked:shadow-[0_4px_15px_rgba(0,102,204,0.2)] shadow-sm flex flex-col items-center justify-center text-center relative">
+                            <span className="text-[15px] md:text-[16px] font-bold text-[#111111] mb-1.5">{v.variantName}</span>
+                            <span className="text-[13px] md:text-[14px] font-semibold text-gray-600">{v.price}€</span>
+
+                            {/* 🔥 BOUTON DÉTAILS - Position exacte à 3px des bords 🔥 */}
+                            <button 
+                              type="button"
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setViewedGrade({ gradeName: v.variantName, drawerDescription: v.drawerDescription, drawerChecklist: v.drawerChecklist }); setInfoDrawerOpen(true); }}
+                              className="absolute bottom-[3px] right-[3px] text-[#0066CC] hover:bg-[#0066CC] hover:text-white flex items-center gap-1 bg-white px-1.5 py-0.5 md:px-2 md:py-1 rounded-md shadow-sm border border-[#0066CC]/20 transition-all z-10"
+                            >
+                              <Info size={12} strokeWidth={2.5} />
+                              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-wider">Détails</span>
+                            </button>
+
                           </div>
                         </label>
                       ))}
@@ -379,13 +514,13 @@ export default function ProductPageClient({ product }: { product: any }) {
 
               {safeColors.length > 0 && (
                 <fieldset className="w-full">
-                  <legend className="text-[15px] mb-2 text-[#111111]">Couleur</legend>
-                  <div className="grid grid-cols-4 gap-2 md:gap-3 w-full">
+                  <legend className="text-[16px] md:text-[18px] font-bold mb-3 text-[#111111] tracking-tight">Couleur</legend>
+                  <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-3 w-full">
                     {safeColors.map((color: string, i: number) => (
                       <label key={i} className="group relative block cursor-pointer w-full">
                         <input type="radio" name="color" className="peer sr-only" checked={selectedColor === i} onChange={() => { setSelectedColor(i); setUserHasSelectedColor(true); }} />
-                        <div className="h-10 w-full rounded-xl border border-transparent bg-white px-0.5 transition-all hover:shadow-[0_4px_15px_rgba(0,102,204,0.12)] peer-checked:border-[#0066CC] peer-checked:bg-[#F4F9FF] peer-checked:shadow-[0_4px_15px_rgba(0,102,204,0.2)] shadow-[0_6px_20px_rgba(0,0,0,0.06)] flex items-center justify-center text-center">
-                          <span className="text-[10px] md:text-[12px] text-[#111111] leading-tight break-words">{color}</span>
+                        <div className="min-h-[44px] md:min-h-[48px] w-full rounded-xl border-2 border-transparent bg-[#F8FAFC] px-2 py-1.5 transition-all hover:shadow-md peer-checked:border-[#0066CC] peer-checked:bg-[#F4F9FF] peer-checked:shadow-[0_4px_15px_rgba(0,102,204,0.2)] shadow-sm flex items-center justify-center text-center">
+                          <span className="text-[13px] md:text-[14px] font-bold text-[#111111] leading-tight break-words">{color}</span>
                         </div>
                       </label>
                     ))}
@@ -405,7 +540,7 @@ export default function ProductPageClient({ product }: { product: any }) {
                     ) : (
                       <span className="w-6 h-6 flex items-center justify-center text-[16px] shrink-0 text-[#111111]">{feature.icon || "✓"}</span>
                     )}
-                    <span className="text-[13px] md:text-[14px] text-[#111111] leading-snug break-words flex-1">{feature.text}</span>
+                    <span className="text-[13px] md:text-[14px] font-medium text-[#111111] leading-snug break-words flex-1">{feature.text}</span>
                   </div>
                 ))}
               </div>
@@ -418,7 +553,7 @@ export default function ProductPageClient({ product }: { product: any }) {
           
           {product.content && (
             <div className="mb-12">
-               <h2 className="text-[20px] md:text-[24px] mb-6 text-[#111111] font-semibold">Description détaillée</h2>
+               <h2 className="text-[20px] md:text-[24px] mb-6 text-[#111111] font-bold">Description détaillée</h2>
                <div className="prose max-w-none text-[#111111] text-[14px] md:text-[15px] leading-relaxed font-normal">
                  <PortableText value={product.content} />
                </div>
@@ -427,12 +562,12 @@ export default function ProductPageClient({ product }: { product: any }) {
 
           {product.specifications && product.specifications.length > 0 && (
             <div className="mb-12">
-              <h2 className="text-[20px] md:text-[24px] mb-6 text-[#111111] font-semibold">Spécifications techniques</h2>
+              <h2 className="text-[20px] md:text-[24px] mb-6 text-[#111111] font-bold">Spécifications techniques</h2>
               <div className="flex flex-col border-t border-gray-200">
                 {product.specifications.map((spec: any, idx: number) => (
                   <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 py-4 gap-1">
-                    <span className="text-[14px] md:text-[15px] text-[#111111] font-medium w-full sm:w-1/3">{spec.label}</span>
-                    <span className="text-[14px] md:text-[15px] text-[#111111] sm:text-right w-full sm:w-2/3">{spec.value}</span>
+                    <span className="text-[14px] md:text-[15px] text-[#111111] font-bold w-full sm:w-1/3">{spec.label}</span>
+                    <span className="text-[14px] md:text-[15px] text-gray-700 font-medium sm:text-right w-full sm:w-2/3">{spec.value}</span>
                   </div>
                 ))}
               </div>
@@ -441,18 +576,18 @@ export default function ProductPageClient({ product }: { product: any }) {
 
           {product.faq && product.faq.length > 0 && (
             <div className="mb-12">
-              <h2 className="text-[20px] md:text-[24px] mb-6 text-[#111111] font-semibold">Questions fréquentes</h2>
+              <h2 className="text-[20px] md:text-[24px] mb-6 text-[#111111] font-bold">Questions fréquentes</h2>
               <div className="space-y-3">
                 {product.faq.map((item: any, i: number) => (
-                  <details key={i} className="group bg-white rounded-xl border border-gray-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden shadow-sm transition-all">
-                    <summary className="flex items-center justify-between cursor-pointer p-4 md:p-5 text-[14px] md:text-[15px] text-[#111111] outline-none font-normal">
+                  <details key={i} className="group bg-[#F8FAFC] rounded-xl border border-gray-200 overflow-hidden [&_summary::-webkit-details-marker]:hidden shadow-sm transition-all">
+                    <summary className="flex items-center justify-between cursor-pointer p-4 md:p-5 text-[14px] md:text-[15px] font-bold text-[#111111] outline-none">
                       {item.question}
-                      <span className="transition duration-300 group-open:rotate-45 ml-4 shrink-0 bg-[#F5F5F7] p-2 rounded-full text-[#111111]">
+                      <span className="transition duration-300 group-open:rotate-45 ml-4 shrink-0 bg-white p-2 rounded-full text-[#111111] shadow-sm">
                         <PlusIcon className="w-5 h-5" />
                       </span>
                     </summary>
                     <div className="px-4 md:px-5 pb-5 pt-0">
-                      <p className="text-[#111111] text-[13px] md:text-[14px] leading-relaxed font-normal">{item.answer}</p>
+                      <p className="text-gray-700 font-medium text-[13px] md:text-[14px] leading-relaxed">{item.answer}</p>
                     </div>
                   </details>
                 ))}
