@@ -2,24 +2,21 @@ import { client } from "@/sanity/lib/client";
 import Image from "next/image";
 import Link from "next/link";
 import { urlFor } from "@/sanity/lib/image";
-import AutoSlider from "@/components/AutoSlider"; // <-- On importe notre Slider magique !
+import AutoSlider from "@/components/AutoSlider"; 
 
-// Revalidation toutes les 60 secondes pour avoir des données fraîches
+// Revalidation toutes les 60 secondes
 export const revalidate = 60;
 
-// Les Meta Tags de la page d'accueil (SEO 10000%)
 export const metadata = {
   title: "RENW | L'Expert du Smartphone Reconditionné et Pièces Détachées",
   description: "Découvrez notre sélection de smartphones reconditionnés Premium garantis 12 mois, testés sur 40 points de contrôle. Pièces détachées d'origine et compatibles.",
 };
 
-// --- DÉFINITION DE L'ICÔNE ---
 const PlusIcon = ({ className }: { className?: string }) => (
   <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
 );
 
 export default async function HomePage() {
-  // REQUÊTE GROQ SURPUISSANTE
   const data = await client.fetch(`*[_type == "homeSettings"][0]{
     ...,
     featuredProducts[]->{
@@ -40,7 +37,6 @@ export default async function HomePage() {
     }
   }`);
 
-  // Les questions/réponses de la FAQ
   const faqs = [
     {
       question: "Pouvez-vous m'aider à recycler mon ancien téléphone ?",
@@ -60,7 +56,6 @@ export default async function HomePage() {
     }
   ];
 
-  // Le schéma JSON-LD pour Google (Rich Snippets)
   const seoSchema = [
     {
       "@context": "https://schema.org",
@@ -100,7 +95,6 @@ export default async function HomePage() {
     }
   ];
 
-  // --- STYLES COMMUNS ---
   const btnPriceStyle = "inline-block bg-[#111111] text-white px-6 py-3 rounded-xl font-normal text-[11px] md:text-[12px] uppercase tracking-widest shadow-[0_8px_20px_rgba(0,0,0,0.15)] hover:opacity-90 transition-all duration-300 w-full text-center";
   const btnSectionStyle = "bg-[#111111] text-white px-6 md:px-12 py-4 md:py-5 rounded-2xl font-normal text-[12px] md:text-[14px] uppercase tracking-widest shadow-[0_10px_30px_rgba(0,0,0,0.2)] border border-[#111111] transition-all duration-500 whitespace-nowrap inline-block";
 
@@ -139,7 +133,7 @@ export default async function HomePage() {
               <Link key={i} href={item.link || "#"} className={`relative overflow-hidden rounded-[1.5rem] bg-white group transition-all duration-500 shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.15)] hover:-translate-y-1 border border-gray-100 flex items-center justify-center p-6 h-[200px] md:h-[320px] ${isBig ? 'md:col-span-2 col-span-2' : 'col-span-1'}`}>
                 {item.image && (
                   <div className="relative w-[70%] h-[70%] z-10">
-                    <Image src={urlFor(item.image).url()} alt={item.title} fill className="object-contain mix-blend-multiply transition-transform duration-700 group-hover:scale-105" sizes="(max-width: 768px) 50vw, 33vw" />
+                    <Image src={urlFor(item.image).url()} alt="" aria-hidden="true" fill className="object-contain mix-blend-multiply transition-transform duration-700 group-hover:scale-105" sizes="(max-width: 768px) 50vw, 33vw" />
                   </div>
                 )}
                 <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-xl shadow-[0_4px_15px_rgba(0,0,0,0.08)] border border-gray-100 z-20 transition-transform group-hover:-translate-y-1">
@@ -171,7 +165,8 @@ export default async function HomePage() {
                         <div className="relative w-[70%] h-[70%]">
                           <Image 
                             src={product.imageUrl} 
-                            alt={`Photo de ${product.name}`} 
+                            alt="" 
+                            aria-hidden="true"
                             fill
                             className="object-contain transition-transform duration-500 group-hover:scale-105 mix-blend-multiply" 
                             sizes="(max-width: 768px) 50vw, 25vw"
@@ -211,7 +206,7 @@ export default async function HomePage() {
                  {item.icon && (
                    <div className="w-12 h-12 flex items-center justify-center mb-4">
                      <div className="relative w-[32px] h-[32px]">
-                       <Image src={urlFor(item.icon).url()} alt="" fill className="object-contain" />
+                       <Image src={urlFor(item.icon).url()} alt="" aria-hidden="true" fill className="object-contain" />
                      </div>
                    </div>
                  )}
@@ -254,7 +249,8 @@ export default async function HomePage() {
                       <div className="relative w-[70%] h-[70%]">
                         <Image 
                           src={product.imageUrl} 
-                          alt={`Photo de ${product.name}`} 
+                          alt="" 
+                          aria-hidden="true"
                           fill
                           className="object-contain transition-transform duration-500 group-hover:scale-105 mix-blend-multiply" 
                           sizes="(max-width: 768px) 50vw, 25vw"

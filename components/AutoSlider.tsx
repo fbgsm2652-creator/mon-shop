@@ -54,7 +54,12 @@ export default function AutoSlider({ slides, btnText }: { slides: any[], btnText
               <h2 className="text-[32px] md:text-[56px] font-normal text-[#111111] tracking-tighter leading-[1.1] mb-6">
                 Passez au meilleur<br/>de la tech.
               </h2>
-              <Link href={slide.link || "/"} className={btnSliderStyle}>
+              {/* 🔥 CORRECTION SEO/ACCESSIBILITÉ : Ajout de aria-label pour différencier les liens 🔥 */}
+              <Link 
+                href={slide.link || "/"} 
+                className={btnSliderStyle}
+                aria-label={`Découvrir le produit : ${slide.alt || 'Promotion ' + (index + 1)}`}
+              >
                 Découvrir l'expertise
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="ml-2 transition-transform group-hover/btn:translate-x-1"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
               </Link>
@@ -63,16 +68,19 @@ export default function AutoSlider({ slides, btnText }: { slides: any[], btnText
         ))}
       </div>
 
-      {/* Petits points de navigation en bas (Optionnel mais très premium) */}
+      {/* Petits points de navigation en bas */}
       {slides.length > 1 && (
-        <div className="absolute bottom-4 right-6 md:bottom-8 md:right-12 z-30 flex gap-2">
+        <div className="absolute bottom-4 right-6 md:bottom-8 md:right-12 z-30 flex gap-1">
           {slides.map((_, idx) => (
+            /* 🔥 CORRECTION ACCESSIBILITÉ : p-3 rajouté pour agrandir la zone cliquable sans modifier le visuel 🔥 */
             <button 
               key={idx} 
               onClick={() => setCurrentIndex(idx)}
-              className={`h-2 rounded-full transition-all duration-500 ${currentIndex === idx ? 'w-8 bg-[#0066CC]' : 'w-2 bg-gray-300 hover:bg-gray-400'}`}
+              className="p-3 focus:outline-none"
               aria-label={`Aller à la diapositive ${idx + 1}`}
-            />
+            >
+              <div className={`h-2 rounded-full transition-all duration-500 ${currentIndex === idx ? 'w-8 bg-[#0066CC]' : 'w-2 bg-gray-300 hover:bg-gray-400'}`} />
+            </button>
           ))}
         </div>
       )}

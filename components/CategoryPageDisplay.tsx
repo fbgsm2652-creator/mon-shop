@@ -233,19 +233,23 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
                         alt={p.name} 
                         fill
                         priority={index < 4} 
+                        /* 🔥 CORRECTION PERFORMANCE : sizes plus petits sur mobile 🔥 */
+                        sizes="(max-width: 768px) 50vw, 25vw"
                         className="object-contain p-4 transition-transform duration-700 group-hover:scale-105" 
                       />
                     )}
                   </div>
 
                   <div className="mb-4 flex-1">
-                    <h2 className="font-medium text-[14px] md:text-[15px] leading-tight text-[#111111] line-clamp-2">{p.name}</h2>
+                    {/* 🔥 CORRECTION SÉMANTIQUE : balise h3 au lieu de h2 pour respecter la hiérarchie de la page 🔥 */}
+                    <h3 className="font-medium text-[14px] md:text-[15px] leading-tight text-[#111111] line-clamp-2">{p.name}</h3>
                   </div>
 
                   {/* Ligne de séparation renforcée */}
                   <div className="mt-auto flex items-end justify-between pt-4 border-t border-gray-200">
                     <div className="flex flex-col">
-                      <span className="text-[10px] text-gray-400 font-medium line-through leading-none mb-1">{offPrice}€</span>
+                      {/* 🔥 CORRECTION ACCESSIBILITÉ : text-gray-500 au lieu de text-gray-400 pour un meilleur contraste 🔥 */}
+                      <span className="text-[10px] text-gray-500 font-medium line-through leading-none mb-1">{offPrice}€</span>
                       <span style={{ color: brandBlue }} className="text-[18px] md:text-[21px] font-medium leading-none">{p.parsedMinPrice}€</span>
                     </div>
 
@@ -253,7 +257,7 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
                       type="button" 
                       onClick={(e) => handleQuickAdd(e, p)} 
                       className="w-9 h-9 md:w-11 md:h-11 bg-[#111111] text-white rounded-[0.8rem] hover:opacity-80 transition-all flex items-center justify-center shadow-md active:scale-95"
-                      aria-label="Ajouter au panier"
+                      aria-label={`Ajouter ${p.name} au panier`}
                     >
                       <ShoppingBag size={18} />
                     </button>
@@ -354,7 +358,7 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
           <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-500 rounded-l-[1.5rem]">
              <div className="p-8 border-b border-gray-50 flex justify-between items-center">
                 <h2 className="text-2xl font-[1000] uppercase tracking-tighter">Affiner</h2>
-                <button onClick={() => setIsFilterMenuOpen(false)} className="p-3 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors"><X/></button>
+                <button onClick={() => setIsFilterMenuOpen(false)} aria-label="Fermer les filtres" className="p-3 bg-gray-50 rounded-full hover:bg-gray-100 transition-colors"><X/></button>
              </div>
              <div className="flex-1 overflow-y-auto p-8 space-y-10">
                 <div>
@@ -369,7 +373,7 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
                 </div>
                 <div>
                    <h3 className="font-black uppercase text-[11px] tracking-widest text-gray-400 mb-6">Budget Maximum</h3>
-                   <input type="range" min="0" max="1500" step="50" value={maxPrice || 1500} onChange={(e) => setMaxPrice(Number(e.target.value))} className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer" style={{ accentColor: brandBlue }} />
+                   <input aria-label="Ajuster le budget maximum" type="range" min="0" max="1500" step="50" value={maxPrice || 1500} onChange={(e) => setMaxPrice(Number(e.target.value))} className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer" style={{ accentColor: brandBlue }} />
                    <div style={{ color: brandBlue }} className="mt-4 text-3xl font-[1000]">{maxPrice || 1500}€</div>
                 </div>
              </div>
@@ -386,11 +390,11 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
       {quickViewProduct && (
         <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 bg-[#111111]/70 backdrop-blur-md transition-all duration-300 animate-in fade-in">
           <div className="bg-white w-full max-w-lg rounded-[1.5rem] p-8 md:p-10 relative shadow-2xl animate-in zoom-in duration-300">
-            <button onClick={() => setQuickViewProduct(null)} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-[#111111] bg-gray-50 rounded-full transition-colors"><X size={20} /></button>
+            <button onClick={() => setQuickViewProduct(null)} aria-label="Fermer" className="absolute top-6 right-6 p-2 text-gray-400 hover:text-[#111111] bg-gray-50 rounded-full transition-colors"><X size={20} /></button>
             
             <div className="flex flex-col items-center text-center">
               <div className="w-full aspect-video relative mb-8 bg-[#F0F7FF] rounded-[1.2rem] flex items-center justify-center p-8 border border-[#E0F0FF]">
-                <Image src={typeof quickViewProduct.mainImage === 'string' ? quickViewProduct.mainImage : quickViewProduct.mainImage?.asset?.url} fill className="object-contain p-6 mix-blend-multiply" alt={quickViewProduct.name} />
+                <Image src={typeof quickViewProduct.mainImage === 'string' ? quickViewProduct.mainImage : quickViewProduct.mainImage?.asset?.url} fill sizes="300px" className="object-contain p-6 mix-blend-multiply" alt={quickViewProduct.name} />
               </div>
               
               <h2 className="text-[24px] font-[1000] mb-2 leading-tight text-[#111111]">{quickViewProduct.name}</h2>
@@ -421,11 +425,11 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
       {addedToCartProduct && (
         <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 bg-[#111111]/70 backdrop-blur-md transition-all duration-300 animate-in fade-in">
           <div className="bg-white w-full max-w-lg rounded-[1.5rem] p-8 md:p-10 relative shadow-2xl animate-in zoom-in duration-300">
-            <button onClick={() => setAddedToCartProduct(null)} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-[#111111] bg-gray-50 rounded-full transition-colors"><X size={20} /></button>
+            <button onClick={() => setAddedToCartProduct(null)} aria-label="Fermer" className="absolute top-6 right-6 p-2 text-gray-400 hover:text-[#111111] bg-gray-50 rounded-full transition-colors"><X size={20} /></button>
             
             <div className="flex flex-col items-center text-center">
               <div className="w-full aspect-video relative mb-8 bg-[#F0F7FF] rounded-[1.2rem] flex items-center justify-center p-8 border border-[#E0F0FF]">
-                <Image src={typeof addedToCartProduct.mainImage === 'string' ? addedToCartProduct.mainImage : addedToCartProduct.mainImage?.asset?.url} fill className="object-contain p-6 mix-blend-multiply" alt={addedToCartProduct.name} />
+                <Image src={typeof addedToCartProduct.mainImage === 'string' ? addedToCartProduct.mainImage : addedToCartProduct.mainImage?.asset?.url} fill sizes="300px" className="object-contain p-6 mix-blend-multiply" alt={addedToCartProduct.name} />
               </div>
               
               <h2 className="text-[24px] font-[1000] mb-2 leading-tight text-[#111111]">{addedToCartProduct.name}</h2>

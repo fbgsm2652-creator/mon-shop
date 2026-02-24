@@ -184,7 +184,8 @@ export default function ProductPageClient({ product }: { product: any }) {
           {/* En-tête du volet */}
           <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-[#F8FAFC]">
              <h3 className="text-[18px] font-black tracking-tight text-[#111111] uppercase">Guide d'information</h3>
-             <button onClick={() => setInfoDrawerOpen(false)} className="p-2 hover:bg-gray-200 bg-white shadow-sm rounded-full transition-colors text-gray-600">
+             {/* 🔥 CORRECTION ACCESSIBILITÉ : aria-label ajouté 🔥 */}
+             <button onClick={() => setInfoDrawerOpen(false)} aria-label="Fermer le guide" className="p-2 hover:bg-gray-200 bg-white shadow-sm rounded-full transition-colors text-gray-600">
                <X size={20}/>
              </button>
           </div>
@@ -251,11 +252,12 @@ export default function ProductPageClient({ product }: { product: any }) {
         </div>
       </>
 
-      {/* 🔥 POPUP AJOUT PANIER (Déjà existante) 🔥 */}
+      {/* 🔥 POPUP AJOUT PANIER 🔥 */}
       {showModal && (
         <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-[#111111]/70 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white rounded-[1.5rem] p-6 md:p-8 max-w-lg w-full shadow-2xl relative animate-in zoom-in duration-300 text-[#111111]">
-            <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"><PlusIcon className="w-6 h-6 rotate-45" /></button>
+            {/* 🔥 CORRECTION ACCESSIBILITÉ : aria-label ajouté 🔥 */}
+            <button aria-label="Fermer la notification d'ajout au panier" onClick={() => setShowModal(false)} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"><PlusIcon className="w-6 h-6 rotate-45" /></button>
             <div className="flex flex-col items-center text-center mt-4">
               <div className="w-full aspect-video relative mb-6 bg-[#F4F9FF] rounded-xl flex items-center justify-center p-4 border border-[#E5F0FF]">
                 {displayImage && <Image src={urlFor(displayImage).url()} fill className="object-contain mix-blend-multiply" alt="Succès" />}
@@ -329,7 +331,8 @@ export default function ProductPageClient({ product }: { product: any }) {
                    <li key={i} className="snap-center shrink-0 w-[85vw] aspect-square relative rounded-[1.5rem] overflow-hidden bg-white shadow-[0_10px_40px_rgba(0,0,0,0.06)] border border-gray-100 flex items-center justify-center p-4">
                      {img && (
                        <div className="relative w-[90%] h-[90%]">
-                         <Image src={typeof img === 'string' ? img : urlFor(img).url()} alt={img.alt || product.name} fill priority={i === 0} fetchPriority={i === 0 ? "high" : "auto"} className="object-contain mix-blend-multiply" sizes="85vw" />
+                         {/* 🔥 CORRECTION PERFORMANCE : sizes plus petits sur mobile 🔥 */}
+                         <Image src={typeof img === 'string' ? img : urlFor(img).url()} alt={img.alt || product.name} fill priority={i === 0} fetchPriority={i === 0 ? "high" : "auto"} className="object-contain mix-blend-multiply" sizes="(max-width: 768px) 85vw, 50vw" />
                        </div>
                      )}
                    </li>
@@ -355,9 +358,11 @@ export default function ProductPageClient({ product }: { product: any }) {
                 {allImages.length > 1 && (
                   <div className="flex gap-3 flex-wrap pb-2">
                     {allImages.map((img: any, i: number) => (
-                       <button key={i} onClick={() => setSelectedImageIdx(i)} className={`w-14 h-14 shrink-0 rounded-xl bg-white p-2 border transition-all ${selectedImageIdx === i ? 'border-[#0066CC] shadow-md' : 'border-gray-100 shadow-[0_4px_10px_rgba(0,0,0,0.05)] hover:border-gray-300'}`}>
+                       /* 🔥 CORRECTION ACCESSIBILITÉ : aria-label ajouté pour les boutons miniatures 🔥 */
+                       <button key={i} aria-label={`Voir l'image ${i + 1}`} onClick={() => setSelectedImageIdx(i)} className={`w-14 h-14 shrink-0 rounded-xl bg-white p-2 border transition-all ${selectedImageIdx === i ? 'border-[#0066CC] shadow-md' : 'border-gray-100 shadow-[0_4px_10px_rgba(0,0,0,0.05)] hover:border-gray-300'}`}>
                          <div className="relative w-full h-full">
-                            <Image src={typeof img === 'string' ? img : urlFor(img).url()} fill className="object-contain mix-blend-multiply" alt=""/>
+                            {/* 🔥 CORRECTION PERFORMANCE : sizes="60px" pour ces petites images 🔥 */}
+                            <Image src={typeof img === 'string' ? img : urlFor(img).url()} fill sizes="60px" className="object-contain mix-blend-multiply" alt=""/>
                          </div>
                        </button>
                     ))}
@@ -392,7 +397,6 @@ export default function ProductPageClient({ product }: { product: any }) {
               </button>
             </div>
 
-            {/* 🔥 BLOC DE VENTES CROISÉES (LISTE VERTICALE INDIVIDUELLE) 🔥 */}
             {validCrossSells.length > 0 && (
               <div className="mb-6 bg-white border border-[#E5F0FF] rounded-2xl p-4 md:p-5 shadow-[0_10px_40px_rgba(0,102,204,0.05)] w-full box-border">
                 <h2 className="text-[16px] md:text-[18px] mb-4 text-[#111111] font-bold tracking-tight">Souvent achetés ensemble</h2>
@@ -402,7 +406,8 @@ export default function ProductPageClient({ product }: { product: any }) {
                     <div key={cs._id || index} className="flex items-center justify-between gap-3 bg-[#F8FAFC] p-3 rounded-xl border border-gray-100 transition-colors hover:border-gray-200">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 md:w-14 md:h-14 shrink-0 bg-white rounded-lg relative overflow-hidden p-1.5 border border-gray-100 shadow-sm">
-                           {cs.mainImage && <Image src={typeof cs.mainImage === 'string' ? cs.mainImage : urlFor(cs.mainImage).url()} fill sizes="60px" className="object-contain mix-blend-multiply" alt={cs.name} />}
+                           {/* 🔥 CORRECTION ACCESSIBILITÉ : aria-hidden ajouté 🔥 */}
+                           {cs.mainImage && <Image src={typeof cs.mainImage === 'string' ? cs.mainImage : urlFor(cs.mainImage).url()} fill sizes="60px" className="object-contain mix-blend-multiply" alt="" aria-hidden="true" />}
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[13px] md:text-[14px] font-bold text-[#111111] leading-tight line-clamp-2">{cs.name}</span>
@@ -471,7 +476,6 @@ export default function ProductPageClient({ product }: { product: any }) {
                       {product.grades?.[selectedVariant]?.capacities?.map((cap: any, i: number) => (
                         <label key={i} className="group relative block cursor-pointer w-full">
                           <input type="radio" name="storage" className="peer sr-only" checked={selectedCap === i} onChange={() => setSelectedCap(i)} />
-                          {/* 🔥 BOUTON CAPACITÉ FIN - min-h-[44px] pour correspondre aux couleurs 🔥 */}
                           <div className="min-h-[44px] md:min-h-[48px] w-full rounded-xl border-2 border-transparent bg-[#F8FAFC] py-1.5 px-1 transition-all hover:shadow-md peer-checked:border-[#0066CC] peer-checked:bg-[#F4F9FF] peer-checked:shadow-[0_4px_15px_rgba(0,102,204,0.2)] shadow-sm flex flex-col items-center justify-center text-center leading-tight">
                             <span className="text-[13px] md:text-[15px] font-bold text-[#111111] leading-none mb-1 break-words">{cap.storage}</span>
                             <span className="text-[11px] md:text-[12px] font-semibold text-gray-600 leading-none">{cap.price}€</span>
@@ -494,7 +498,6 @@ export default function ProductPageClient({ product }: { product: any }) {
                             <span className="text-[15px] md:text-[16px] font-bold text-[#111111] mb-1.5">{v.variantName}</span>
                             <span className="text-[13px] md:text-[14px] font-semibold text-gray-600">{v.price}€</span>
 
-                            {/* 🔥 BOUTON DÉTAILS - Position exacte à 3px des bords 🔥 */}
                             <button 
                               type="button"
                               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setViewedGrade({ gradeName: v.variantName, drawerDescription: v.drawerDescription, drawerChecklist: v.drawerChecklist }); setInfoDrawerOpen(true); }}
@@ -535,7 +538,8 @@ export default function ProductPageClient({ product }: { product: any }) {
                   <div key={idx} className="flex items-center gap-3 bg-[#F8FBFF] p-3 md:p-4 rounded-xl border border-[#E5F0FF] w-full shadow-sm">
                     {feature.iconImage ? (
                       <div className="w-6 h-6 relative shrink-0">
-                        <Image src={urlFor(feature.iconImage).url()} alt="" fill className="object-contain" />
+                        {/* 🔥 CORRECTION PERFORMANCE : sizes="24px" ajouté 🔥 */}
+                        <Image src={urlFor(feature.iconImage).url()} alt="" fill sizes="24px" className="object-contain" />
                       </div>
                     ) : (
                       <span className="w-6 h-6 flex items-center justify-center text-[16px] shrink-0 text-[#111111]">{feature.icon || "✓"}</span>
@@ -624,7 +628,8 @@ export default function ProductPageClient({ product }: { product: any }) {
                       )}
                     </div>
                     <div className="px-1 space-y-2 flex flex-col flex-grow text-left">
-                      <h4 className="text-[12px] md:text-[13px] font-bold text-[#111111] line-clamp-2 leading-tight uppercase">{p.name}</h4>
+                      {/* 🔥 CORRECTION SÉMANTIQUE : h4 -> h3 🔥 */}
+                      <h3 className="text-[12px] md:text-[13px] font-bold text-[#111111] line-clamp-2 leading-tight uppercase">{p.name}</h3>
                       <div className="pt-2 mt-auto w-full flex flex-col">
                         <span className="text-[14px] md:text-[16px] font-[1000] text-[#0066CC] mb-2">{p.minPrice ? `${p.minPrice}€` : "Voir le produit"}</span>
                         <span className="inline-block bg-[#F5F5F7] text-[#111111] px-4 py-2.5 rounded-lg font-black text-[9px] md:text-[10px] uppercase tracking-widest group-hover:bg-[#111111] group-hover:text-white transition-all duration-300 w-full text-center">
@@ -667,7 +672,8 @@ export default function ProductPageClient({ product }: { product: any }) {
                       )}
                     </div>
                     <div className="px-1 space-y-2 flex flex-col flex-grow text-left">
-                      <h4 className="text-[12px] md:text-[13px] font-bold text-[#111111] line-clamp-2 leading-tight uppercase">{p.name}</h4>
+                      {/* 🔥 CORRECTION SÉMANTIQUE : h4 -> h3 🔥 */}
+                      <h3 className="text-[12px] md:text-[13px] font-bold text-[#111111] line-clamp-2 leading-tight uppercase">{p.name}</h3>
                       <div className="pt-2 mt-auto w-full flex flex-col">
                         <span className="text-[14px] md:text-[16px] font-[1000] text-[#0066CC] mb-2">{p.minPrice ? `${p.minPrice}€` : "Voir le produit"}</span>
                         <span className="inline-block bg-[#F5F5F7] text-[#111111] px-4 py-2.5 rounded-lg font-black text-[9px] md:text-[10px] uppercase tracking-widest group-hover:bg-[#111111] group-hover:text-white transition-all duration-300 w-full text-center">
