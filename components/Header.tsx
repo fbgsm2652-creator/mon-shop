@@ -108,6 +108,7 @@ export default function Header({ categories, settings }: HeaderProps) {
               <ShoppingBag size={24} strokeWidth={1.5} aria-hidden="true" />
               {cartCount > 0 && <span className="absolute -top-1 -right-2 bg-[#0066CC] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">{cartCount}</span>}
             </Link>
+            {/* BOUTON LE MAG (PC Uniquement) */}
             <Link href="/blog" className="bg-[#F1F5F9] text-[#475569] px-6 py-2.5 rounded-full font-bold text-[11px] uppercase tracking-widest hover:bg-[#111111] hover:text-white transition-all hidden md:block">
               {settings?.magLinkText || "Le Mag"}
             </Link>
@@ -152,7 +153,6 @@ export default function Header({ categories, settings }: HeaderProps) {
               )}
 
               {/* LE MEGA MENU GEANT */}
-              {/* 🔥 La classe s'adapte magiquement grâce au state forceClose 🔥 */}
               <div className={`absolute left-0 top-full w-full bg-white border-t border-gray-200 shadow-[0_40px_100px_rgba(0,0,0,0.15)] transition-all duration-300 z-[1100] border-b-[4px] border-[#0066CC] ${forceClose ? 'hidden' : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible'}`}>
                 <div className="flex w-full max-w-[1600px] mx-auto min-h-[400px]">
                   
@@ -181,7 +181,7 @@ export default function Header({ categories, settings }: HeaderProps) {
                             <span className="text-[14px] font-bold text-[#111111]">{sub.title}</span>
                           </div>
                           
-                          {/* LES LIENS FINAUX */}
+                          {/* LES LIENS FINAUX (CORRIGÉ : text-[#111111] au lieu de text-gray-500) */}
                           <ul className="p-6 space-y-4 list-none m-0">
                             {sub.finalModels?.map((model: any, modelIdx: number) => (
                               <li key={`model-${modelIdx}`}>
@@ -189,7 +189,7 @@ export default function Header({ categories, settings }: HeaderProps) {
                                   prefetch={false}
                                   onClick={closeAllMenus}
                                   href={`/${model.slug?.current || model.slug}`} 
-                                  className="text-[14px] font-medium text-gray-500 hover:text-[#0066CC] flex items-center group/link transition-all"
+                                  className="text-[14px] font-medium text-[#111111] hover:text-[#0066CC] flex items-center group/link transition-all"
                                 >
                                   <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover/link:opacity-100 group-hover/link:translate-x-0 transition-all text-[#0066CC] mr-2" aria-hidden="true" />
                                   {model.title || model.name}
@@ -221,7 +221,9 @@ export default function Header({ categories, settings }: HeaderProps) {
       {/* 4. MOBILE DRAWER */}
       <div id="mobile-drawer-menu" className={`absolute left-0 w-full z-[990] lg:hidden transition-all duration-500 shadow-2xl ${mobileMenuOpen ? "top-full opacity-100 visible" : "top-[90%] opacity-0 invisible pointer-events-none"}`} aria-hidden={!mobileMenuOpen}>
         
-        <nav className="w-full bg-white flex flex-col max-h-[75vh] overflow-hidden border-t border-gray-100" aria-label="Menu mobile">
+        <nav className="w-full bg-white flex flex-col h-[75vh] overflow-hidden border-t border-gray-100" aria-label="Menu mobile">
+          
+          {/* Liste des catégories (Scrollable) */}
           <div className="flex-1 overflow-y-auto px-4 py-2 bg-white">
             {!activeSubMenu ? (
               <ul className="space-y-2 py-2">
@@ -251,8 +253,9 @@ export default function Header({ categories, settings }: HeaderProps) {
                     <ul className="grid gap-2 px-2">
                       {sub.finalModels?.map((model: any, mIdx: number) => (
                         <li key={mIdx}>
-                          <Link prefetch={false} href={`/${model.slug?.current || model.slug}`} onClick={closeAllMenus} className="flex items-center justify-between py-3 border-b border-gray-50 font-medium text-[14px] text-gray-600 hover:text-[#0066CC]">
-                            {model.title || model.name} <ArrowRight size={14} aria-hidden="true" />
+                          {/* 🔥 CORRECTION MOBILE : text-[#111111] au lieu de text-gray-600 🔥 */}
+                          <Link prefetch={false} href={`/${model.slug?.current || model.slug}`} onClick={closeAllMenus} className="flex items-center justify-between py-3 border-b border-gray-50 font-medium text-[14px] text-[#111111] hover:text-[#0066CC]">
+                            {model.title || model.name} <ArrowRight size={14} aria-hidden="true" className="text-[#0066CC]" />
                           </Link>
                         </li>
                       ))}
@@ -262,6 +265,16 @@ export default function Header({ categories, settings }: HeaderProps) {
               </div>
             )}
           </div>
+
+          {/* 🔥 BOUTON LE MAG (Mobile : toujours visible en bas du menu) 🔥 */}
+          {!activeSubMenu && (
+            <div className="p-4 border-t border-gray-100 bg-gray-50 shrink-0">
+               <Link href="/blog" onClick={closeAllMenus} className="flex items-center justify-center w-full bg-white border border-gray-200 text-[#111111] px-6 py-4 rounded-xl font-bold text-[13px] uppercase tracking-widest hover:bg-[#111111] hover:text-white transition-all shadow-sm">
+                  {settings?.magLinkText || "Le Mag"}
+               </Link>
+            </div>
+          )}
+
         </nav>
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm -z-10 h-screen w-screen" onClick={closeAllMenus} aria-hidden="true" />
       </div>

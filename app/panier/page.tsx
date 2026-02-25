@@ -5,7 +5,7 @@ import { urlFor } from "@/sanity/lib/image";
 import Link from "next/link";
 import Image from "next/image"; 
 import { useEffect, useState } from "react";
-import { Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { Trash2, ShoppingBag, ArrowRight, CreditCard, SmartphoneNfc } from "lucide-react";
 
 export default function PanierPage() {
   const [isMounted, setIsMounted] = useState(false);
@@ -48,7 +48,6 @@ export default function PanierPage() {
           {/* COLONNE GAUCHE : ARTICLES */}
           <main className="flex-1 space-y-8 w-full" role="main">
             <header className="lg:pt-4 mb-10">
-              {/* 🔥 DESIGN : Gras adouci (font-semibold au lieu de font-black) 🔥 */}
               <h1 className="text-[32px] md:text-[40px] font-semibold tracking-tight leading-none uppercase">
                 Mon panier<span className="text-[#0066CC]">.</span>
               </h1>
@@ -88,7 +87,6 @@ export default function PanierPage() {
                       <div className="mt-6 md:mt-0 md:ml-10 flex-1 w-full">
                         <div className="flex justify-between items-start">
                           <div className="space-y-4">
-                            {/* 🔥 DESIGN : Gras adouci (font-semibold) 🔥 */}
                             <h2 className="text-[20px] md:text-[24px] font-semibold text-[#111111] tracking-tight leading-tight">
                               {item.name}
                             </h2>
@@ -111,12 +109,10 @@ export default function PanierPage() {
                               )}
                             </div>
                           </div>
-                          {/* 🔥 DESIGN : Gras adouci pour le prix 🔥 */}
                           <p className="text-[22px] md:text-[26px] font-bold tracking-tight text-[#111111]">{item.price}€</p>
                         </div>
 
                         <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-100">
-                          {/* 🔥 DESIGN : Bouton Retirer en ROUGE bien visible 🔥 */}
                           <button 
                               onClick={() => onRemove(item._id)} 
                               aria-label={`Retirer ${item.name} du panier`}
@@ -153,11 +149,9 @@ export default function PanierPage() {
 
                 <div className="pt-8 mt-8 border-t border-gray-200 flex justify-between items-end">
                   <span className="text-[11px] font-semibold uppercase text-gray-500 tracking-[0.2em] mb-1">Total TTC</span>
-                  {/* 🔥 DESIGN : Gras adouci pour le total 🔥 */}
                   <span className="text-[36px] md:text-[42px] font-bold tracking-tight leading-none text-[#111111]">{total}€</span>
                 </div>
 
-                {/* 🔥 DESIGN : Bouton VALIDER en BLEU 🔥 */}
                 <Link 
                     href="/checkout" 
                     className={`w-full flex items-center justify-center gap-3 py-5 rounded-2xl font-semibold uppercase tracking-widest text-[12px] mt-8 text-center transition-all ${
@@ -169,15 +163,27 @@ export default function PanierPage() {
                   Valider la commande <ArrowRight size={16} />
                 </Link>
 
-                <div className="mt-10 flex flex-col items-center gap-6 pt-8 border-t border-gray-200/50">
-                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Paiement Rapide & Sécurisé</span>
+                <div className="mt-10 flex flex-col items-center gap-5 pt-8 border-t border-gray-200/50">
+                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest text-center">Paiement Rapide & Sécurisé</span>
                     
-                    {/* 🔥 DESIGN : Apple Pay, Google Pay, Visa ET Mastercard 🔥 */}
-                    <div className="flex items-center justify-center gap-4 md:gap-6 transition-all duration-500">
-                        <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" className="h-5 md:h-6 w-auto" alt="Paiement par Apple Pay" />
-                        <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" className="h-5 md:h-6 w-auto" alt="Paiement par Google Pay" />
-                        <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" className="h-3.5 md:h-4 w-auto" alt="Paiement par carte Visa" />
-                        <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" className="h-4 md:h-5 w-auto" alt="Paiement par Mastercard" />
+                    {/* 🔥 DESIGN UNIFIÉ CSS 100% FIABLE 🔥 */}
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                        {/* Bloc CB générique */}
+                        <div className="h-8 px-3 bg-white border border-gray-200 text-gray-700 rounded-lg flex items-center justify-center text-[11px] font-black tracking-widest shadow-sm">
+                            CB
+                        </div>
+                        {/* Bloc VISA */}
+                        <div className="h-8 px-3 bg-white border border-gray-200 text-[#1434CB] rounded-lg flex items-center justify-center text-[12px] font-black italic tracking-widest shadow-sm">
+                            VISA
+                        </div>
+                        {/* Bloc MASTER */}
+                        <div className="h-8 px-3 bg-white border border-gray-200 text-[#EB001B] rounded-lg flex items-center justify-center text-[10px] font-black tracking-widest shadow-sm">
+                            MASTER
+                        </div>
+                        {/* Bloc Mobile Pay (Apple/Google unifiés) */}
+                        <div className="h-8 px-3 bg-[#111111] text-white rounded-lg flex items-center justify-center gap-1.5 text-[11px] font-semibold tracking-wider shadow-sm">
+                            <SmartphoneNfc size={14} /> Pay
+                        </div>
                     </div>
                 </div>
               </div>
