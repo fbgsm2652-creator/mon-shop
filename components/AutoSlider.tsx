@@ -37,6 +37,7 @@ export default function AutoSlider({ slides, btnText }: { slides: any[], btnText
                 fill 
                 className="object-contain drop-shadow-2xl mix-blend-multiply" 
                 priority={index === 0}
+                fetchPriority={index === 0 ? "high" : "auto"} /* 🔥 AJOUT POUR GOOGLE PAGESPEED 🔥 */
                 sizes="(max-width: 768px) 80vw, 60vw"
               />
             </div>

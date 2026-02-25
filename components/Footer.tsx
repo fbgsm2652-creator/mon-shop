@@ -47,7 +47,8 @@ export default async function Footer() {
 
             {/* ADRESSE DEPUIS SANITY */}
             <address className="not-italic space-y-2 mb-10 border-l-2 border-[#0066CC] pl-4">
-              <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">Siège Social</p>
+              {/* 🔥 CORRECTION CONTRASTE : text-gray-500 au lieu de 400 🔥 */}
+              <p className="text-[13px] font-bold text-gray-500 uppercase tracking-widest">Siège Social</p>
               <p className="text-[14px] font-medium text-[#111111] leading-snug max-w-[250px] whitespace-pre-line">
                 {settings.address}
               </p>
@@ -59,10 +60,11 @@ export default async function Footer() {
                 <ShieldCheck className="w-4 h-4 text-[#0066CC]" />
                 <span className="text-[11px] font-bold uppercase tracking-widest text-[#111111]">Paiement 100% Sécurisé</span>
               </div>
-              <div className="flex items-center gap-3 opacity-50 grayscale hover:grayscale-0 transition-all duration-300">
-                <div className="w-10 h-7 bg-white border border-gray-200 rounded-md flex items-center justify-center text-[8px] font-bold shadow-sm">VISA</div>
-                <div className="w-10 h-7 bg-white border border-gray-200 rounded-md flex items-center justify-center text-[8px] font-bold shadow-sm">MASTER</div>
-                <div className="w-10 h-7 bg-white border border-gray-200 rounded-md flex items-center justify-center text-[8px] font-bold shadow-sm">AMEX</div>
+              {/* 🔥 CORRECTION CONTRASTE : opacity-75 au lieu de 50 et ajout de text-gray-700 🔥 */}
+              <div className="flex items-center gap-3 opacity-75 grayscale hover:grayscale-0 transition-all duration-300">
+                <div className="w-10 h-7 bg-white border border-gray-200 text-gray-700 rounded-md flex items-center justify-center text-[8px] font-bold shadow-sm">VISA</div>
+                <div className="w-10 h-7 bg-white border border-gray-200 text-gray-700 rounded-md flex items-center justify-center text-[8px] font-bold shadow-sm">MASTER</div>
+                <div className="w-10 h-7 bg-white border border-gray-200 text-gray-700 rounded-md flex items-center justify-center text-[8px] font-bold shadow-sm">AMEX</div>
                 <div className="w-10 h-7 bg-white border border-gray-200 rounded-md flex items-center justify-center shadow-sm"><CreditCard className="w-4 h-4 text-gray-700" /></div>
               </div>
             </div>
@@ -98,7 +100,8 @@ export default async function Footer() {
         {/* BAS DU FOOTER */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
-            <span className="text-[12px] md:text-[13px] text-gray-400 font-medium">
+            {/* 🔥 CORRECTION CONTRASTE : text-gray-500 au lieu de 400 🔥 */}
+            <span className="text-[12px] md:text-[13px] text-gray-500 font-medium">
               © {new Date().getFullYear()} <span className="font-bold text-[#111111]">{settings.logoText}</span>. Tous droits réservés.
             </span>
           </div>

@@ -73,13 +73,14 @@ export default function Header({ categories, settings }: HeaderProps) {
         <div className="max-w-7xl mx-auto w-full px-4 md:px-6 h-[60px] md:h-24 flex items-center justify-between">
           
           <div className="flex-1 flex lg:hidden items-center justify-start">
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 -ml-2 text-[#111111]">
+            {/* 🔥 CORRECTION ACCESSIBILITÉ : aria-label ajouté */}
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 -ml-2 text-[#111111]" aria-label="Ouvrir le menu principal">
               {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
           </div>
 
           <div className="flex-1 lg:flex-none flex items-center justify-center lg:justify-start shrink-0">
-            <Link href="/" className="hover:opacity-80 transition-opacity flex items-center justify-center">
+            <Link href="/" className="hover:opacity-80 transition-opacity flex items-center justify-center" aria-label="Retour à l'accueil">
               {settings?.logoImage ? (
                 <Image src={urlFor(settings.logoImage).url()} alt="RENW Logo" width={120} height={60} className="object-contain" priority />
               ) : (
@@ -91,17 +92,19 @@ export default function Header({ categories, settings }: HeaderProps) {
           {/* 🔥 RECHERCHE DESKTOP (Produits) 🔥 */}
           <div className="flex-1 px-8 hidden lg:flex items-center gap-3">
             <form className="relative group flex-1" role="search" action="/search" method="GET">
-              <input type="search" name="q" placeholder="Chercher un produit, modèle..." className="w-full bg-[#F5F5F7] rounded-full py-2.5 px-5 pl-11 text-[13px] font-medium outline-none border border-transparent focus:bg-white focus:border-gray-200 focus:shadow-md transition-all" />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <input type="search" name="q" placeholder="Chercher un produit, modèle..." aria-label="Rechercher un produit" className="w-full bg-[#F5F5F7] rounded-full py-2.5 px-5 pl-11 text-[13px] font-medium outline-none border border-transparent focus:bg-white focus:border-gray-200 focus:shadow-md transition-all" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} aria-hidden="true" />
             </form>
           </div>
 
           <div className="flex-1 lg:flex-none flex items-center justify-end gap-4 md:gap-6">
             <div className="text-[#111111] hover:text-[#0066CC] transition-colors cursor-pointer">
-              {isMounted && (isSignedIn ? <UserButton afterSignOutUrl="/" /> : <Link href="/mon-compte"><User size={24} strokeWidth={1.5} /></Link>)}
+              {/* 🔥 CORRECTION ACCESSIBILITÉ : aria-label ajouté */}
+              {isMounted && (isSignedIn ? <UserButton afterSignOutUrl="/" /> : <Link href="/mon-compte" aria-label="Accéder à mon compte"><User size={24} strokeWidth={1.5} aria-hidden="true" /></Link>)}
             </div>
-            <Link href="/panier" className="relative text-[#111111] hover:text-[#0066CC] transition-colors group flex items-center">
-              <ShoppingBag size={24} strokeWidth={1.5} />
+            {/* 🔥 CORRECTION ACCESSIBILITÉ : aria-label ajouté */}
+            <Link href="/panier" className="relative text-[#111111] hover:text-[#0066CC] transition-colors group flex items-center" aria-label="Voir mon panier">
+              <ShoppingBag size={24} strokeWidth={1.5} aria-hidden="true" />
               {cartCount > 0 && <span className="absolute -top-1 -right-2 bg-[#0066CC] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">{cartCount}</span>}
             </Link>
             <Link href="/blog" className="bg-[#F1F5F9] text-[#475569] px-6 py-2.5 rounded-full font-bold text-[11px] uppercase tracking-widest hover:bg-[#111111] hover:text-white transition-all hidden md:block">
@@ -114,26 +117,26 @@ export default function Header({ categories, settings }: HeaderProps) {
       {/* 🔥 RECHERCHE MOBILE FIXE (Produits uniquement) 🔥 */}
       <div className="w-full px-4 pb-3 lg:hidden mt-1 bg-white border-b border-gray-100 relative z-[1001]">
         <form className="relative w-full" role="search" action="/search" method="GET">
-          <input type="search" name="q" placeholder="Chercher un produit, modèle..." className="w-full bg-[#F5F5F7] rounded-full py-3 px-6 pl-12 text-[14px] font-medium outline-none border border-transparent focus:bg-white focus:border-gray-200 focus:shadow-sm transition-all" />
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <input type="search" name="q" placeholder="Chercher un produit, modèle..." aria-label="Rechercher un produit" className="w-full bg-[#F5F5F7] rounded-full py-3 px-6 pl-12 text-[14px] font-medium outline-none border border-transparent focus:bg-white focus:border-gray-200 focus:shadow-sm transition-all" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} aria-hidden="true" />
         </form>
       </div>
 
       {/* 2. LA GRANDE BARRE NOIRE */}
-      <nav className="hidden lg:block shadow-md relative z-[1000]" style={{ backgroundColor: brandSlate }}>
+      <nav className="hidden lg:block shadow-md relative z-[1000]" style={{ backgroundColor: brandSlate }} aria-label="Menu principal">
         <ul className="max-w-7xl mx-auto px-6 flex items-center justify-start list-none m-0 p-0">
           {categories?.map((parent, index) => (
             
             <li key={`parent-${index}`} className="group static flex items-center">
               
               <Link prefetch={false} href={`/${parent.slug}`} className="flex items-center gap-2 text-[15px] font-semibold text-white hover:text-[#0066CC] transition-colors px-4 py-3.5">
-                {parent.icon && <span className="text-gray-300 group-hover:text-[#0066CC] transition-colors">{renderIcon(parent.icon, 18)}</span>}
+                {parent.icon && <span className="text-gray-300 group-hover:text-[#0066CC] transition-colors" aria-hidden="true">{renderIcon(parent.icon, 18)}</span>}
                 {parent.title}
               </Link>
 
-              {/* 🔥 LE SÉPARATEUR BLANC PUR (sauf après le dernier élément) 🔥 */}
+              {/* SÉPARATEUR BLANC PUR */}
               {index < categories.length - 1 && (
-                <div className="h-4 w-[1px] bg-white mx-2 opacity-80"></div>
+                <div className="h-4 w-[1px] bg-white mx-2 opacity-80" aria-hidden="true"></div>
               )}
 
               {/* LE MEGA MENU GEANT */}
@@ -145,7 +148,7 @@ export default function Header({ categories, settings }: HeaderProps) {
                     <div className="w-[300px] bg-[#FBFBFD] p-8 flex flex-col items-center justify-center border-r border-gray-100 shrink-0">
                       <Image 
                         src={urlFor(parent.menuImage).url()} 
-                        alt={parent.title} 
+                        alt={`Image de la catégorie ${parent.title}`} 
                         width={220} height={220} 
                         className="object-contain transition-transform duration-700 hover:scale-105 drop-shadow-xl" 
                       />
@@ -159,9 +162,9 @@ export default function Header({ categories, settings }: HeaderProps) {
                       {parent.subCategories?.map((sub: any, subIdx: number) => (
                         <div key={`sub-${subIdx}`} className="flex flex-col bg-white">
                           
-                          {/* LA 2EME BARRE (Gris soutenu) */}
+                          {/* LA 2EME BARRE */}
                           <div className="bg-[#F1F5F9] px-6 py-3.5 border-b border-gray-200 flex items-center gap-3 min-h-[55px]">
-                            {sub.icon && <span className="text-[#0066CC]">{renderIcon(sub.icon, 18)}</span>}
+                            {sub.icon && <span className="text-[#0066CC]" aria-hidden="true">{renderIcon(sub.icon, 18)}</span>}
                             <span className="text-[14px] font-bold text-[#111111]">{sub.title}</span>
                           </div>
                           
@@ -175,7 +178,7 @@ export default function Header({ categories, settings }: HeaderProps) {
                                   href={`/${model.slug?.current || model.slug}`} 
                                   className="text-[14px] font-medium text-gray-500 hover:text-[#0066CC] flex items-center group/link transition-all"
                                 >
-                                  <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover/link:opacity-100 group-hover/link:translate-x-0 transition-all text-[#0066CC] mr-2" />
+                                  <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover/link:opacity-100 group-hover/link:translate-x-0 transition-all text-[#0066CC] mr-2" aria-hidden="true" />
                                   {model.title || model.name}
                                 </Link>
                               </li>
@@ -197,46 +200,46 @@ export default function Header({ categories, settings }: HeaderProps) {
 
       {/* 3. BARRE PROMO */}
       {settings?.promoMessage && (
-        <div className="bg-[#F5F5F7] text-[#111111] py-2 text-center text-[11px] md:text-[12px] font-bold uppercase w-full border-t border-gray-100">
+        <div className="bg-[#F5F5F7] text-[#111111] py-2 text-center text-[11px] md:text-[12px] font-bold uppercase w-full border-t border-gray-100" aria-live="polite">
           {settings.promoMessage}
         </div>
       )}
 
       {/* 4. MOBILE DRAWER */}
-      <div id="mobile-drawer-menu" className={`absolute left-0 w-full z-[990] lg:hidden transition-all duration-500 shadow-2xl ${mobileMenuOpen ? "top-full opacity-100 visible" : "top-[90%] opacity-0 invisible pointer-events-none"}`}>
+      <div id="mobile-drawer-menu" className={`absolute left-0 w-full z-[990] lg:hidden transition-all duration-500 shadow-2xl ${mobileMenuOpen ? "top-full opacity-100 visible" : "top-[90%] opacity-0 invisible pointer-events-none"}`} aria-hidden={!mobileMenuOpen}>
         
-        <nav className="w-full bg-white flex flex-col max-h-[75vh] overflow-hidden border-t border-gray-100">
+        <nav className="w-full bg-white flex flex-col max-h-[75vh] overflow-hidden border-t border-gray-100" aria-label="Menu mobile">
           <div className="flex-1 overflow-y-auto px-4 py-2 bg-white">
             {!activeSubMenu ? (
               <ul className="space-y-2 py-2">
                 {categories?.map((cat, idx) => (
                   <li key={idx}>
-                    <button onClick={() => setActiveSubMenu(cat)} className="w-full flex items-center justify-between p-4 bg-[#F8FAFC] rounded-xl text-[15px] font-semibold text-[#111111]">
+                    <button onClick={() => setActiveSubMenu(cat)} className="w-full flex items-center justify-between p-4 bg-[#F8FAFC] rounded-xl text-[15px] font-semibold text-[#111111]" aria-expanded={activeSubMenu === cat}>
                       <div className="flex items-center gap-3">
-                        {cat.icon && <span className="text-[#0066CC]">{renderIcon(cat.icon, 20)}</span>}
+                        {cat.icon && <span className="text-[#0066CC]" aria-hidden="true">{renderIcon(cat.icon, 20)}</span>}
                         {cat.title}
                       </div>
-                      <ChevronRight size={18} className="text-gray-400" />
+                      <ChevronRight size={18} className="text-gray-400" aria-hidden="true" />
                     </button>
                   </li>
                 ))}
               </ul>
             ) : (
               <div className="space-y-6 py-4">
-                <button onClick={() => setActiveSubMenu(null)} className="flex items-center gap-2 text-[13px] font-black text-[#0066CC] mb-4 px-2">
-                  <ChevronLeft size={16} /> Retour
+                <button onClick={() => setActiveSubMenu(null)} className="flex items-center gap-2 text-[13px] font-black text-[#0066CC] mb-4 px-2" aria-label="Retour au menu principal">
+                  <ChevronLeft size={16} aria-hidden="true" /> Retour
                 </button>
                 {activeSubMenu.subCategories?.map((sub: any, subIdx: number) => (
                   <div key={`mob-sub-${subIdx}`}>
                     <div className="p-3 mb-2 bg-[#F1F5F9] rounded-lg flex items-center gap-2">
-                        {sub.icon && <span className="text-[#0066CC]">{renderIcon(sub.icon, 16)}</span>}
+                        {sub.icon && <span className="text-[#0066CC]" aria-hidden="true">{renderIcon(sub.icon, 16)}</span>}
                         <p className="font-bold text-[14px] text-[#111111]">{sub.title}</p>
                     </div>
                     <ul className="grid gap-2 px-2">
                       {sub.finalModels?.map((model: any, mIdx: number) => (
                         <li key={mIdx}>
                           <Link prefetch={false} href={`/${model.slug?.current || model.slug}`} onClick={closeAllMenus} className="flex items-center justify-between py-3 border-b border-gray-50 font-medium text-[14px] text-gray-600 hover:text-[#0066CC]">
-                            {model.title || model.name} <ArrowRight size={14} />
+                            {model.title || model.name} <ArrowRight size={14} aria-hidden="true" />
                           </Link>
                         </li>
                       ))}
@@ -247,7 +250,7 @@ export default function Header({ categories, settings }: HeaderProps) {
             )}
           </div>
         </nav>
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm -z-10 h-screen w-screen" onClick={closeAllMenus} />
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm -z-10 h-screen w-screen" onClick={closeAllMenus} aria-hidden="true" />
       </div>
     </header>
   );
