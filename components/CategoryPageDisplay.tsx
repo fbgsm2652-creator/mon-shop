@@ -232,8 +232,8 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
                         src={typeof p.mainImage === 'string' ? p.mainImage : p.mainImage?.asset?.url} 
                         alt={p.name} 
                         fill
-                        priority={index < 4} 
-                        /* 🔥 CORRECTION PERFORMANCE : sizes plus petits sur mobile 🔥 */
+                        priority={index < 4}
+                        /* 🔥 CORRECTION PERFORMANCE : sizes 🔥 */ 
                         sizes="(max-width: 768px) 50vw, 25vw"
                         className="object-contain p-4 transition-transform duration-700 group-hover:scale-105" 
                       />
@@ -241,14 +241,14 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
                   </div>
 
                   <div className="mb-4 flex-1">
-                    {/* 🔥 CORRECTION SÉMANTIQUE : balise h3 au lieu de h2 pour respecter la hiérarchie de la page 🔥 */}
+                    {/* 🔥 CORRECTION ACCESSIBILITÉ : h3 au lieu de h2 🔥 */}
                     <h3 className="font-medium text-[14px] md:text-[15px] leading-tight text-[#111111] line-clamp-2">{p.name}</h3>
                   </div>
 
                   {/* Ligne de séparation renforcée */}
                   <div className="mt-auto flex items-end justify-between pt-4 border-t border-gray-200">
                     <div className="flex flex-col">
-                      {/* 🔥 CORRECTION ACCESSIBILITÉ : text-gray-500 au lieu de text-gray-400 pour un meilleur contraste 🔥 */}
+                      {/* 🔥 CORRECTION ACCESSIBILITÉ : text-gray-500 au lieu de text-gray-400 🔥 */}
                       <span className="text-[10px] text-gray-500 font-medium line-through leading-none mb-1">{offPrice}€</span>
                       <span style={{ color: brandBlue }} className="text-[18px] md:text-[21px] font-medium leading-none">{p.parsedMinPrice}€</span>
                     </div>
@@ -390,11 +390,11 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
       {quickViewProduct && (
         <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 bg-[#111111]/70 backdrop-blur-md transition-all duration-300 animate-in fade-in">
           <div className="bg-white w-full max-w-lg rounded-[1.5rem] p-8 md:p-10 relative shadow-2xl animate-in zoom-in duration-300">
-            <button onClick={() => setQuickViewProduct(null)} aria-label="Fermer" className="absolute top-6 right-6 p-2 text-gray-400 hover:text-[#111111] bg-gray-50 rounded-full transition-colors"><X size={20} /></button>
+            <button aria-label="Fermer la vue rapide" onClick={() => setQuickViewProduct(null)} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-[#111111] bg-gray-50 rounded-full transition-colors"><X size={20} /></button>
             
             <div className="flex flex-col items-center text-center">
               <div className="w-full aspect-video relative mb-8 bg-[#F0F7FF] rounded-[1.2rem] flex items-center justify-center p-8 border border-[#E0F0FF]">
-                <Image src={typeof quickViewProduct.mainImage === 'string' ? quickViewProduct.mainImage : quickViewProduct.mainImage?.asset?.url} fill sizes="300px" className="object-contain p-6 mix-blend-multiply" alt={quickViewProduct.name} />
+                <Image src={typeof quickViewProduct.mainImage === 'string' ? quickViewProduct.mainImage : quickViewProduct.mainImage?.asset?.url} fill sizes="(max-width: 768px) 80vw, 400px" className="object-contain p-6 mix-blend-multiply" alt={quickViewProduct.name} />
               </div>
               
               <h2 className="text-[24px] font-[1000] mb-2 leading-tight text-[#111111]">{quickViewProduct.name}</h2>
@@ -425,11 +425,11 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
       {addedToCartProduct && (
         <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 bg-[#111111]/70 backdrop-blur-md transition-all duration-300 animate-in fade-in">
           <div className="bg-white w-full max-w-lg rounded-[1.5rem] p-8 md:p-10 relative shadow-2xl animate-in zoom-in duration-300">
-            <button onClick={() => setAddedToCartProduct(null)} aria-label="Fermer" className="absolute top-6 right-6 p-2 text-gray-400 hover:text-[#111111] bg-gray-50 rounded-full transition-colors"><X size={20} /></button>
+            <button aria-label="Fermer la notification" onClick={() => setAddedToCartProduct(null)} className="absolute top-6 right-6 p-2 text-gray-400 hover:text-[#111111] bg-gray-50 rounded-full transition-colors"><X size={20} /></button>
             
             <div className="flex flex-col items-center text-center">
               <div className="w-full aspect-video relative mb-8 bg-[#F0F7FF] rounded-[1.2rem] flex items-center justify-center p-8 border border-[#E0F0FF]">
-                <Image src={typeof addedToCartProduct.mainImage === 'string' ? addedToCartProduct.mainImage : addedToCartProduct.mainImage?.asset?.url} fill sizes="300px" className="object-contain p-6 mix-blend-multiply" alt={addedToCartProduct.name} />
+                <Image src={typeof addedToCartProduct.mainImage === 'string' ? addedToCartProduct.mainImage : addedToCartProduct.mainImage?.asset?.url} fill sizes="(max-width: 768px) 80vw, 400px" className="object-contain p-6 mix-blend-multiply" alt={addedToCartProduct.name} />
               </div>
               
               <h2 className="text-[24px] font-[1000] mb-2 leading-tight text-[#111111]">{addedToCartProduct.name}</h2>

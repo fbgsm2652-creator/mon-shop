@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import CookieBanner from "@/components/CookieBanner"; // 👈 Import de la bannière Cookie
+import CookieBanner from "@/components/CookieBanner";
 import { Toaster } from "react-hot-toast";
 import { ClerkProvider } from "@clerk/nextjs"; 
 import { frFR } from "@clerk/localizations"; 
@@ -16,13 +16,16 @@ async function getNavigationData() {
     "categories": *[_type == "category" && isParent == true] | order(title asc) {
       _id, 
       title, 
+      icon, 
       menuImage,
       "slug": slug.current,
       subCategories[] {
         title,
+        icon,
         "finalModels": finalModels[]-> {
           _id,
           title,
+          name,
           "slug": slug.current
         }
       }

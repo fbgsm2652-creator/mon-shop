@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin } from "lucide-react"; // 🔥 L'icône Phone a été retirée
 import { client } from "@/sanity/lib/client";
 
 // --- SEO EXPLOSIF ---
@@ -24,8 +24,7 @@ export default async function ContactPage() {
   const email = settings?.contactEmail || "contact@renw.fr";
   const emailSubtext = settings?.contactEmailSubtext || "Nous répondons généralement sous 24h.";
   
-  const phone = settings?.contactPhone || "01 23 45 67 89";
-  const phoneSubtext = settings?.contactPhoneSubtext || "Du Lundi au Vendredi, de 9h à 18h.";
+  // 🔥 Toute la partie Téléphone a été supprimée d'ici 🔥
   
   const address = settings?.contactAddress || "RENW France\n123 Avenue de la Technologie\n75000 Paris, France";
 
@@ -69,19 +68,9 @@ export default async function ContactPage() {
                 </div>
               </div>
 
-              {/* Info Bloc 2 : Téléphone */}
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-[#F5F5F7] flex items-center justify-center shrink-0">
-                  <Phone className="text-[#0066CC]" size={20} />
-                </div>
-                <div>
-                  <h3 className="text-[15px] font-bold text-[#111111] mb-1">Téléphone</h3>
-                  <p className="text-[14px] text-[#111111] opacity-70 mb-1 font-normal">{phoneSubtext}</p>
-                  <a href={`tel:${phone.replace(/\s+/g, '')}`} className="text-[15px] font-medium text-[#0066CC] hover:underline">{phone}</a>
-                </div>
-              </div>
+              {/* 🔥 Le bloc HTML Téléphone a été complètement retiré d'ici 🔥 */}
 
-              {/* Info Bloc 3 : Siège Social */}
+              {/* Info Bloc 2 : Siège Social */}
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-full bg-[#F5F5F7] flex items-center justify-center shrink-0">
                   <MapPin className="text-[#0066CC]" size={20} />

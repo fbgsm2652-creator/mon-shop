@@ -1,18 +1,21 @@
 import { type SchemaTypeDefinition } from 'sanity'
 
 // 1. Imports des modèles
-// Note : Assure-toi que ces fichiers utilisent "export const product = ..." 
-// ou adapte l'import si c'est du "export default"
 import { product } from './product'
 import { category } from './category'
 import { post } from './post' 
 import order from './order' 
-import { homeSettings } from './homeSettings' // Corrigé pour correspondre à mon export précédent
+import { homeSettings } from './homeSettings' 
 import headerSettings from './headerSettings'
 import footerSettings from './footerSettings'
-import customer from './customer'
 import settings from './settings' 
 import shippingMethod from './shipping'
+
+// 🔥 CORRECTION ICI : On remet bien "./customer" comme à l'origine
+import customer from './customer'
+
+// 🔥 Ton nouveau fichier pour les pages libres
+import infoPage from './infoPage'
 
 // 2. Schémas secondaires du Mag (Optimisés SEO)
 const blogCategory: SchemaTypeDefinition = {
@@ -72,20 +75,23 @@ const blogHome: SchemaTypeDefinition = {
 // 3. Exportation vers le Studio
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
-    // Configuration Globale (Priorité Admin)
+    // Configuration Globale
     homeSettings as SchemaTypeDefinition,
     headerSettings as SchemaTypeDefinition,
     footerSettings as SchemaTypeDefinition,
     settings as SchemaTypeDefinition,
 
-    // Boutique (Cœur du business)
+    // Boutique 
     product, 
     category, 
     order as SchemaTypeDefinition, 
     customer as SchemaTypeDefinition,
     shippingMethod as SchemaTypeDefinition,
     
-    // Le Mag (SEO Content)
+    // 🔥 AJOUT ICI : Les pages informatives
+    infoPage as SchemaTypeDefinition,
+
+    // Le Mag 
     post, 
     blogCategory, 
     blogHome,
