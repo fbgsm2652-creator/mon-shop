@@ -172,11 +172,12 @@ export default function PanierPage() {
                 <div className="mt-10 flex flex-col items-center gap-6 pt-8 border-t border-gray-200/50">
                     <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Paiement Rapide & Sécurisé</span>
                     
-                    {/* 🔥 DESIGN : Apple Pay, Google Pay ET Visa en couleur 🔥 */}
-                    <div className="flex items-center justify-center gap-8 transition-all duration-500">
-                        <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" className="h-6 w-auto" alt="Paiement par Apple Pay" />
-                        <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" className="h-6 w-auto" alt="Paiement par Google Pay" />
-                        <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" className="h-4 w-auto" alt="Paiement par carte Visa" />
+                    {/* 🔥 DESIGN : Apple Pay, Google Pay, Visa ET Mastercard 🔥 */}
+                    <div className="flex items-center justify-center gap-4 md:gap-6 transition-all duration-500">
+                        <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" className="h-5 md:h-6 w-auto" alt="Paiement par Apple Pay" />
+                        <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" className="h-5 md:h-6 w-auto" alt="Paiement par Google Pay" />
+                        <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" className="h-3.5 md:h-4 w-auto" alt="Paiement par carte Visa" />
+                        <img loading="lazy" decoding="async" src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" className="h-4 md:h-5 w-auto" alt="Paiement par Mastercard" />
                     </div>
                 </div>
               </div>

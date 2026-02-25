@@ -71,9 +71,19 @@ export default async function Footer() {
           </div>
 
           {/* COLONNE DROITE : NAVIGATION DYNAMIQUE SANITY */}
-          <div className="lg:w-2/3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-12 lg:gap-10 pt-2 lg:pt-0">
+          {/* 🔥 AJOUT DE LA SÉPARATION : md:divide-x md:divide-[#0066CC]/15 🔥 */}
+          <div className="lg:w-2/3 grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-0 pt-2 lg:pt-0 md:divide-x md:divide-[#0066CC]/15">
             {settings.sections?.slice(0, 3).map((section: any, idx: number) => (
-              <nav key={idx} aria-labelledby={`footer-nav-${idx}`} className="flex flex-col">
+              <nav 
+                key={idx} 
+                aria-labelledby={`footer-nav-${idx}`} 
+                // 🔥 ESPACEMENT PARFAIT : Padding différent selon la position pour que les lignes soient bien centrées 🔥
+                className={`flex flex-col ${
+                  idx === 0 ? 'md:pr-8 lg:pr-12' : 
+                  idx === 1 ? 'md:px-8 lg:px-12' : 
+                  'md:pl-8 lg:pl-12'
+                }`}
+              >
                 <h3 id={`footer-nav-${idx}`} className="text-[14px] font-bold text-[#111111] mb-6 flex items-center gap-0">
                   {section.title}
                 </h3>
