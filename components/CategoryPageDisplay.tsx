@@ -241,14 +241,13 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
                   </div>
 
                   <div className="mb-4 flex-1">
-                    {/* 🔥 CORRECTION ACCESSIBILITÉ : h3 au lieu de h2 🔥 */}
-                    <h3 className="font-medium text-[14px] md:text-[15px] leading-tight text-[#111111] line-clamp-2">{p.name}</h3>
+                    {/* 🔥 CORRECTION ACCESSIBILITÉ : h2 au lieu de h3 pour respecter la hiérarchie 🔥 */}
+                    <h2 className="font-medium text-[14px] md:text-[15px] leading-tight text-[#111111] line-clamp-2">{p.name}</h2>
                   </div>
 
                   {/* Ligne de séparation renforcée */}
                   <div className="mt-auto flex items-end justify-between pt-4 border-t border-gray-200">
                     <div className="flex flex-col">
-                      {/* 🔥 CORRECTION ACCESSIBILITÉ : text-gray-500 au lieu de text-gray-400 🔥 */}
                       <span className="text-[10px] text-gray-500 font-medium line-through leading-none mb-1">{offPrice}€</span>
                       <span style={{ color: brandBlue }} className="text-[18px] md:text-[21px] font-medium leading-none">{p.parsedMinPrice}€</span>
                     </div>

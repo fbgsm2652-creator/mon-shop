@@ -35,6 +35,9 @@ export default function Header({ categories, settings }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState<any>(null);
   
+  // 🔥 L'INTERRUPTEUR MAGIQUE POUR FORCER LA FERMETURE SUR PC 🔥
+  const [forceClose, setForceClose] = useState(false);
+  
   const cart = useCart();
   const { isSignedIn } = useUser(); 
 
@@ -51,6 +54,7 @@ export default function Header({ categories, settings }: HeaderProps) {
   const closeAllMenus = () => {
     setMobileMenuOpen(false);
     setActiveSubMenu(null);
+    setForceClose(true); // 🔥 On active la fermeture forcée au clic
   };
 
   const renderIcon = (iconString: string, size: number = 18) => {
@@ -73,7 +77,6 @@ export default function Header({ categories, settings }: HeaderProps) {
         <div className="max-w-7xl mx-auto w-full px-4 md:px-6 h-[60px] md:h-24 flex items-center justify-between">
           
           <div className="flex-1 flex lg:hidden items-center justify-start">
-            {/* 🔥 CORRECTION ACCESSIBILITÉ : aria-label ajouté */}
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 -ml-2 text-[#111111]" aria-label="Ouvrir le menu principal">
               {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
@@ -89,7 +92,7 @@ export default function Header({ categories, settings }: HeaderProps) {
             </Link>
           </div>
 
-          {/* 🔥 RECHERCHE DESKTOP (Produits) 🔥 */}
+          {/* RECHERCHE DESKTOP */}
           <div className="flex-1 px-8 hidden lg:flex items-center gap-3">
             <form className="relative group flex-1" role="search" action="/search" method="GET">
               <input type="search" name="q" placeholder="Chercher un produit, modèle..." aria-label="Rechercher un produit" className="w-full bg-[#F5F5F7] rounded-full py-2.5 px-5 pl-11 text-[13px] font-medium outline-none border border-transparent focus:bg-white focus:border-gray-200 focus:shadow-md transition-all" />
@@ -99,10 +102,8 @@ export default function Header({ categories, settings }: HeaderProps) {
 
           <div className="flex-1 lg:flex-none flex items-center justify-end gap-4 md:gap-6">
             <div className="text-[#111111] hover:text-[#0066CC] transition-colors cursor-pointer">
-              {/* 🔥 CORRECTION ACCESSIBILITÉ : aria-label ajouté */}
               {isMounted && (isSignedIn ? <UserButton afterSignOutUrl="/" /> : <Link href="/mon-compte" aria-label="Accéder à mon compte"><User size={24} strokeWidth={1.5} aria-hidden="true" /></Link>)}
             </div>
-            {/* 🔥 CORRECTION ACCESSIBILITÉ : aria-label ajouté */}
             <Link href="/panier" className="relative text-[#111111] hover:text-[#0066CC] transition-colors group flex items-center" aria-label="Voir mon panier">
               <ShoppingBag size={24} strokeWidth={1.5} aria-hidden="true" />
               {cartCount > 0 && <span className="absolute -top-1 -right-2 bg-[#0066CC] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">{cartCount}</span>}
@@ -114,7 +115,7 @@ export default function Header({ categories, settings }: HeaderProps) {
         </div>
       </div>
 
-      {/* 🔥 RECHERCHE MOBILE FIXE (Produits uniquement) 🔥 */}
+      {/* RECHERCHE MOBILE FIXE */}
       <div className="w-full px-4 pb-3 lg:hidden mt-1 bg-white border-b border-gray-100 relative z-[1001]">
         <form className="relative w-full" role="search" action="/search" method="GET">
           <input type="search" name="q" placeholder="Chercher un produit, modèle..." aria-label="Rechercher un produit" className="w-full bg-[#F5F5F7] rounded-full py-3 px-6 pl-12 text-[14px] font-medium outline-none border border-transparent focus:bg-white focus:border-gray-200 focus:shadow-sm transition-all" />
@@ -127,9 +128,20 @@ export default function Header({ categories, settings }: HeaderProps) {
         <ul className="max-w-7xl mx-auto px-6 flex items-center justify-start list-none m-0 p-0">
           {categories?.map((parent, index) => (
             
-            <li key={`parent-${index}`} className="group static flex items-center">
+            // 🔥 On désactive la fermeture forcée dès que la souris quitte la catégorie 🔥
+            <li 
+              key={`parent-${index}`} 
+              className="group static flex items-center" 
+              onMouseLeave={() => setForceClose(false)}
+            >
               
-              <Link prefetch={false} href={`/${parent.slug}`} className="flex items-center gap-2 text-[15px] font-semibold text-white hover:text-[#0066CC] transition-colors px-4 py-3.5">
+              {/* 🔥 On ferme aussi si le client clique sur la catégorie principale 🔥 */}
+              <Link 
+                prefetch={false} 
+                href={`/${parent.slug}`} 
+                onClick={() => setForceClose(true)} 
+                className="flex items-center gap-2 text-[15px] font-semibold text-white hover:text-[#0066CC] transition-colors px-4 py-3.5"
+              >
                 {parent.icon && <span className="text-gray-300 group-hover:text-[#0066CC] transition-colors" aria-hidden="true">{renderIcon(parent.icon, 18)}</span>}
                 {parent.title}
               </Link>
@@ -140,7 +152,8 @@ export default function Header({ categories, settings }: HeaderProps) {
               )}
 
               {/* LE MEGA MENU GEANT */}
-              <div className="absolute left-0 top-full w-full bg-white border-t border-gray-200 shadow-[0_40px_100px_rgba(0,0,0,0.15)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[1100] border-b-[4px] border-[#0066CC]">
+              {/* 🔥 La classe s'adapte magiquement grâce au state forceClose 🔥 */}
+              <div className={`absolute left-0 top-full w-full bg-white border-t border-gray-200 shadow-[0_40px_100px_rgba(0,0,0,0.15)] transition-all duration-300 z-[1100] border-b-[4px] border-[#0066CC] ${forceClose ? 'hidden' : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible'}`}>
                 <div className="flex w-full max-w-[1600px] mx-auto min-h-[400px]">
                   
                   {/* L'IMAGE A GAUCHE */}
