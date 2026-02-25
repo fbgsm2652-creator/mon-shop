@@ -9,9 +9,17 @@ export const category = defineType({
   fields: [
     defineField({
       name: 'title',
-      title: 'Nom de la catégorie (H1)',
+      title: 'Nom court (Menu & URL) - ex: iPhone X',
       type: 'string',
       validation: (Rule) => Rule.required(),
+    }),
+    // 🔥 NOUVEAU CHAMP POUR LE SEO (H1) 🔥
+    defineField({
+      name: 'h1Title',
+      title: 'Gros Titre de la page (H1 SEO) - ex: Pièces Détachées iPhone X (A1865, A1901)',
+      type: 'string',
+      description: 'Laissez vide pour utiliser le nom court par défaut.',
+      hidden: ({ document }) => !document?.isFinal,
     }),
     defineField({
       name: 'isFinal',
@@ -26,7 +34,6 @@ export const category = defineType({
       initialValue: false,
       hidden: ({ document }) => document?.isFinal === true,
     }),
-    // 🔥 NOUVEAU CHAMP : Pour gérer l'ordre d'affichage dans la barre noire
     defineField({
       name: 'menuPosition',
       title: 'Position dans le menu',

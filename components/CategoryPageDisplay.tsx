@@ -131,8 +131,8 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org/",
         "@type": "CollectionPage",
-        "name": `${category.name || category.title} Reconditionné - RENW`,
-        "description": category.metaDescription || category.description || "Découvrez notre gamme reconditionnée premium.",
+        "name": `${category.h1Title || category.name || category.title} - RENW`,
+        "description": category.metaDescription || category.description || "Découvrez notre gamme premium.",
         "url": `${baseUrl}/${category.slug?.current || category.slug}`,
         "mainEntity": {
           "@type": "ItemList",
@@ -157,8 +157,9 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
             Expertise RENW France
           </span>
           
+          {/* 🔥 MODIFICATION H1 : Prise en compte du nouveau champ SEO 🔥 */}
           <h1 className="text-[22px] sm:text-[28px] md:text-[38px] font-[1000] tracking-tighter leading-none text-[#111111] uppercase whitespace-nowrap overflow-hidden text-ellipsis">
-            {category.name || category.title}<span style={{ color: brandBlue }}>.</span>
+            {category.h1Title || category.name || category.title}<span style={{ color: brandBlue }}>.</span>
           </h1>
 
           {/* DESCRIPTION SOUS LE H1 (Connectée à Sanity) */}
@@ -233,7 +234,6 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
                         alt={p.name} 
                         fill
                         priority={index < 4}
-                        /* 🔥 CORRECTION PERFORMANCE : sizes 🔥 */ 
                         sizes="(max-width: 768px) 50vw, 25vw"
                         className="object-contain p-4 transition-transform duration-700 group-hover:scale-105" 
                       />
@@ -241,7 +241,6 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
                   </div>
 
                   <div className="mb-4 flex-1">
-                    {/* 🔥 CORRECTION ACCESSIBILITÉ : h2 au lieu de h3 pour respecter la hiérarchie 🔥 */}
                     <h2 className="font-medium text-[14px] md:text-[15px] leading-tight text-[#111111] line-clamp-2">{p.name}</h2>
                   </div>
 
