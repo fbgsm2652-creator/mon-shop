@@ -6,7 +6,7 @@ import Image from 'next/image';
 import useCart from "@/hooks/use-cart";
 import { urlFor } from "@/sanity/lib/image";
 import { UserButton, useUser } from "@clerk/nextjs"; 
-import { Search, ShoppingBag, Menu, X, ArrowRight, ChevronRight, ChevronLeft, User, ChevronDown } from "lucide-react";
+import { Search, ShoppingBag, Menu, X, ArrowRight, ChevronRight, ChevronLeft, User, ChevronDown, SmartphoneNfc } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 
 import { FaApple, FaAndroid, FaWindows, FaGoogle } from "react-icons/fa";
@@ -70,7 +70,7 @@ export default function Header({ categories, settings }: HeaderProps) {
 
       {/* 1. BARRE PRINCIPALE (BLANCHE) */}
       <div className="relative z-[1001] bg-white flex flex-col w-full border-b border-gray-100">
-        <div className="max-w-7xl mx-auto w-full px-6 h-[60px] md:h-24 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto w-full px-4 md:px-6 h-[60px] md:h-24 flex items-center justify-between">
           
           <div className="flex-1 flex lg:hidden items-center justify-start">
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 -ml-2 text-[#111111]">
@@ -121,15 +121,20 @@ export default function Header({ categories, settings }: HeaderProps) {
 
       {/* 2. LA GRANDE BARRE NOIRE */}
       <nav className="hidden lg:block shadow-md relative z-[1000]" style={{ backgroundColor: brandSlate }}>
-        <ul className="max-w-7xl mx-auto px-6 flex items-center justify-start gap-2 list-none m-0 p-0">
+        <ul className="max-w-7xl mx-auto px-6 flex items-center justify-start list-none m-0 p-0">
           {categories?.map((parent, index) => (
             
-            <li key={`parent-${index}`} className="group static">
+            <li key={`parent-${index}`} className="group static flex items-center">
               
-              <Link prefetch={false} href={`/${parent.slug}`} className="flex items-center gap-2 text-[14px] font-bold uppercase tracking-wider text-white hover:text-[#0066CC] transition-colors px-4 py-3.5">
+              <Link prefetch={false} href={`/${parent.slug}`} className="flex items-center gap-2 text-[15px] font-semibold text-white hover:text-[#0066CC] transition-colors px-4 py-3.5">
                 {parent.icon && <span className="text-gray-300 group-hover:text-[#0066CC] transition-colors">{renderIcon(parent.icon, 18)}</span>}
                 {parent.title}
               </Link>
+
+              {/* 🔥 LE SÉPARATEUR BLANC PUR (sauf après le dernier élément) 🔥 */}
+              {index < categories.length - 1 && (
+                <div className="h-4 w-[1px] bg-white mx-2 opacity-80"></div>
+              )}
 
               {/* LE MEGA MENU GEANT */}
               <div className="absolute left-0 top-full w-full bg-white border-t border-gray-200 shadow-[0_40px_100px_rgba(0,0,0,0.15)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[1100] border-b-[4px] border-[#0066CC]">
@@ -154,7 +159,7 @@ export default function Header({ categories, settings }: HeaderProps) {
                       {parent.subCategories?.map((sub: any, subIdx: number) => (
                         <div key={`sub-${subIdx}`} className="flex flex-col bg-white">
                           
-                          {/* LA 2EME BARRE */}
+                          {/* LA 2EME BARRE (Gris soutenu) */}
                           <div className="bg-[#F1F5F9] px-6 py-3.5 border-b border-gray-200 flex items-center gap-3 min-h-[55px]">
                             {sub.icon && <span className="text-[#0066CC]">{renderIcon(sub.icon, 18)}</span>}
                             <span className="text-[14px] font-bold text-[#111111]">{sub.title}</span>

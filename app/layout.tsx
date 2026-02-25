@@ -13,7 +13,7 @@ import { headers } from "next/headers";
 
 async function getNavigationData() {
   const query = `{
-    "categories": *[_type == "category" && isParent == true] | order(title asc) {
+    "categories": *[_type == "category" && isParent == true] | order(menuPosition asc, title asc) {
       _id, 
       title, 
       icon, 
