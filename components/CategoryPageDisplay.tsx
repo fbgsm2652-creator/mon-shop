@@ -124,10 +124,24 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
     }
   };
 
+  // 🔥 NOUVEAU : GÉNÉRATION DYNAMIQUE DU SCHEMA FAQ
+  const faqSchema = categoryFaqs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": categoryFaqs.map((faq: any) => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  } : null;
+
   return (
     <main style={eliteFont} className="bg-white min-h-screen text-[#111111] antialiased">
       
-      {/* 🚀 SEO 200/100 JSON-LD */}
+      {/* 🚀 SEO SCHEMA 1 : CollectionPage (Produits) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org/",
         "@type": "CollectionPage",
@@ -144,6 +158,14 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
         }
       })}} />
 
+      {/* 🚀 SEO SCHEMA 2 : FAQPage (Rich Snippets Google) */}
+      {faqSchema && (
+        <script 
+          type="application/ld+json" 
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} 
+        />
+      )}
+
       {/* --- HEADER --- */}
       <header className="bg-[#F8FAFC] border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-16">
@@ -157,7 +179,6 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
             Expertise RENW France
           </span>
           
-          {/* 🔥 MODIFICATION H1 : Prise en compte du nouveau champ SEO 🔥 */}
           <h1 className="text-[22px] sm:text-[28px] md:text-[38px] font-[1000] tracking-tighter leading-none text-[#111111] uppercase whitespace-nowrap overflow-hidden text-ellipsis">
             {category.h1Title || category.name || category.title}<span style={{ color: brandBlue }}>.</span>
           </h1>
