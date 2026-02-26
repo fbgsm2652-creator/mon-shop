@@ -6,13 +6,13 @@ export const category = defineType({
   title: 'Catégorie',
   type: 'document',
   icon: Tag,
-  // 🗂️ CRÉATION DES GROUPES (FIELDSETS) POUR ORGANISER LE BO
-  fieldsets: [
-    { name: 'general', title: '1. Informations Générales' },
-    { name: 'megamenu', title: '2. Configuration du Mega Menu', options: { collapsible: true, collapsed: false } },
-    { name: 'content', title: '3. Contenu de la Page (Textes & Réassurance)', options: { collapsible: true, collapsed: false } },
-    { name: 'faqSection', title: '4. Section FAQ', options: { collapsible: true, collapsed: true } },
-    { name: 'seo', title: '5. Configuration SEO (Google & Meta)', options: { collapsible: true, collapsed: false } },
+  // 🗂️ UTILISATION DES "GROUPS" POUR CRÉER DES ONGLETS HORISONTAUX
+  groups: [
+    { name: 'general', title: '1. Général', default: true },
+    { name: 'megamenu', title: '2. Mega Menu' },
+    { name: 'content', title: '3. Contenu & Textes' },
+    { name: 'faqSection', title: '4. FAQ' },
+    { name: 'seo', title: '5. SEO & Meta' },
   ],
   fields: [
     // ==========================================
@@ -22,40 +22,40 @@ export const category = defineType({
       name: 'title',
       title: 'Nom court (Menu & URL) - ex: iPhone X',
       type: 'string',
-      fieldset: 'general',
+      group: 'general', // On assigne ce champ à l'onglet "general"
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'slug',
       title: 'Slug (URL)',
       type: 'slug',
-      fieldset: 'general',
+      group: 'general',
       options: { source: 'title' },
     }),
     defineField({
       name: 'isFinal',
       title: 'Est-ce une catégorie finale ? (Page produit)',
       type: 'boolean',
-      fieldset: 'general',
+      group: 'general',
       initialValue: false,
     }),
     defineField({
       name: 'isParent',
       title: 'Afficher dans la barre de menu haut ?',
       type: 'boolean',
-      fieldset: 'general',
+      group: 'general',
       initialValue: false,
       hidden: ({ document }) => document?.isFinal === true,
     }),
 
     // ==========================================
-    // 2. MEGA MENU (Caché si catégorie finale)
+    // 2. MEGA MENU
     // ==========================================
     defineField({
       name: 'menuPosition',
       title: 'Position dans le menu',
       type: 'number',
-      fieldset: 'megamenu',
+      group: 'megamenu',
       description: 'Ordre d\'affichage (1 = en premier, 2 = en deuxième...).',
       initialValue: 99,
       hidden: ({ document }) => !document?.isParent,
@@ -64,7 +64,7 @@ export const category = defineType({
       name: 'icon',
       title: 'Icône de la GRANDE barre noire',
       type: 'string',
-      fieldset: 'megamenu',
+      group: 'megamenu',
       description: 'Nom de l\'icône Lucide ou nom de la marque (ex: Apple, Samsung, Smartphone, Wrench).',
       hidden: ({ document }) => !document?.isParent,
     }),
@@ -72,14 +72,14 @@ export const category = defineType({
       name: 'menuImage',
       title: 'Image à GAUCHE du Mega Menu',
       type: 'image',
-      fieldset: 'megamenu',
+      group: 'megamenu',
       hidden: ({ document }) => !document?.isParent,
     }),
     defineField({
       name: 'subCategories',
       title: 'Colonnes du Mega Menu (La 2ème barre grise)',
       type: 'array',
-      fieldset: 'megamenu',
+      group: 'megamenu',
       hidden: ({ document }) => !document?.isParent,
       of: [
         {
@@ -99,13 +99,13 @@ export const category = defineType({
     }),
 
     // ==========================================
-    // 3. CONTENU (Caché si parent)
+    // 3. CONTENU & TEXTES
     // ==========================================
     defineField({
       name: 'h1Title',
       title: 'Gros Titre de la page (H1 SEO)',
       type: 'string',
-      fieldset: 'content',
+      group: 'content',
       description: 'Ex: Pièces Détachées iPhone X (A1865, A1901). Laissez vide pour utiliser le nom court.',
       hidden: ({ document }) => !document?.isFinal,
     }),
@@ -113,7 +113,7 @@ export const category = defineType({
       name: 'heroSubtitle',
       title: 'Texte sous le H1 (Introduction)',
       type: 'text',
-      fieldset: 'content',
+      group: 'content',
       description: 'Le texte gris et classe qui s’affiche juste sous le gros titre H1.',
       hidden: ({ document }) => !document?.isFinal,
     }),
@@ -121,7 +121,7 @@ export const category = defineType({
       name: 'engagementTitle',
       title: 'Titre de la section Engagement',
       type: 'string',
-      fieldset: 'content',
+      group: 'content',
       description: 'Ex: "L\'Engagement" (Le mot "RENW." s\'ajoute automatiquement en bleu sur le site)',
       initialValue: 'L\'Engagement',
       hidden: ({ document }) => !document?.isFinal,
@@ -130,7 +130,7 @@ export const category = defineType({
       name: 'features',
       title: 'Logos de Réassurance',
       type: 'array',
-      fieldset: 'content',
+      group: 'content',
       description: 'Ajoutez les petits logos spécifiques à cette catégorie (ex: Livraison 24h, Garantie)',
       hidden: ({ document }) => !document?.isFinal,
       of: [
@@ -147,7 +147,7 @@ export const category = defineType({
       name: 'content',
       title: 'Texte SEO détaillé (Bas de page)',
       type: 'array',
-      fieldset: 'content',
+      group: 'content',
       description: 'Le texte d\'autorité pour Google. Utilisez le menu déroulant pour créer des balises H2 et H3.',
       of: [{ type: 'block' }, { type: 'image' }],
       hidden: ({ document }) => !document?.isFinal,
@@ -156,7 +156,7 @@ export const category = defineType({
       name: 'ctaText',
       title: 'Texte du Bouton (Bas de page)',
       type: 'string',
-      fieldset: 'content',
+      group: 'content',
       initialValue: 'En savoir plus sur nos méthodes',
       hidden: ({ document }) => !document?.isFinal,
     }),
@@ -164,19 +164,19 @@ export const category = defineType({
       name: 'ctaLink',
       title: 'Lien du bouton',
       type: 'string',
-      fieldset: 'content',
+      group: 'content',
       description: 'Tapez simplement l\'URL de la page (ex: /a-propos ou /concept)',
       hidden: ({ document }) => !document?.isFinal,
     }),
 
     // ==========================================
-    // 4. FAQ (Caché si parent)
+    // 4. FAQ
     // ==========================================
     defineField({
       name: 'faqTitle',
       title: 'Titre de la section FAQ',
       type: 'string',
-      fieldset: 'faqSection',
+      group: 'faqSection',
       initialValue: 'Questions Fréquentes',
       hidden: ({ document }) => !document?.isFinal,
     }),
@@ -184,7 +184,7 @@ export const category = defineType({
       name: 'faq',
       title: 'Questions & Réponses',
       type: 'array',
-      fieldset: 'faqSection',
+      group: 'faqSection',
       description: 'Génère automatiquement les Rich Snippets Google (Schema.org).',
       hidden: ({ document }) => !document?.isFinal,
       of: [
@@ -199,13 +199,13 @@ export const category = defineType({
     }),
 
     // ==========================================
-    // 5. SEO & META (Caché si parent)
+    // 5. SEO & META
     // ==========================================
     defineField({
       name: 'metaTitle',
       title: 'Meta Title (Titre Google)',
       type: 'string',
-      fieldset: 'seo',
+      group: 'seo',
       description: 'Titre affiché dans les résultats de recherche (Max 60 caractères).',
       hidden: ({ document }) => !document?.isFinal,
       validation: (Rule) => Rule.max(60).warning('Le titre devrait faire moins de 60 caractères pour ne pas être tronqué sur Google.'),
@@ -214,29 +214,28 @@ export const category = defineType({
       name: 'metaDescription',
       title: 'Meta Description (Texte Google)',
       type: 'text',
-      fieldset: 'seo',
+      group: 'seo',
       description: 'Le petit texte descriptif affiché sous le lien dans Google (Max 150-160 caractères).',
       hidden: ({ document }) => !document?.isFinal,
       validation: (Rule) => Rule.max(160).warning('La description devrait faire moins de 160 caractères pour ne pas être tronquée.'),
     }),
-    // 🔥 NOUVEAU CHAMP : META KEYWORDS 🔥
     defineField({
       name: 'metaKeywords',
       title: 'Mots-clés (Meta Keywords)',
       type: 'array',
-      fieldset: 'seo',
-      description: 'Mots-clés séparés par "Entrée". Utile pour certains moteurs de recherche et pour votre propre suivi.',
+      group: 'seo',
+      description: 'Tapez un mot-clé et appuyez sur Entrée.',
       hidden: ({ document }) => !document?.isFinal,
       of: [{ type: 'string' }],
       options: {
-        layout: 'tags' // Permet d'afficher les mots comme des "étiquettes" visuelles très pratiques dans Sanity
+        layout: 'tags' // L'affichage visuel en bulles
       }
     }),
     defineField({
       name: 'heroImage',
       title: 'Image de partage (Réseaux sociaux / Optionnel)',
       type: 'image',
-      fieldset: 'seo',
+      group: 'seo',
       options: { hotspot: true },
       hidden: ({ document }) => !document?.isFinal,
     }),
