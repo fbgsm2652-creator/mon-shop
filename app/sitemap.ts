@@ -1,15 +1,19 @@
 import { MetadataRoute } from 'next';
 import { client } from '@/sanity/lib/client';
 
+// 🚨 LA LIGNE MAGIQUE : Force Next.js à régénérer le sitemap à chaque visite de Google
+export const dynamic = 'force-dynamic';
+// Optionnel : tu peux utiliser "export const revalidate = 3600;" si tu préfères qu'il se mette à jour toutes les heures.
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://renw.fr';
 
   // 1. RÉCUPÉRATION DYNAMIQUE : Produits, Catégories et Articles de Blog
-  // Ajout de _updatedAt pour les catégories pour un SEO ultra-précis
+  // 🚨 AJOUT DE 'defined(slug.current)' pour ignorer les brouillons sans URL qui font bugger le sitemap
   const query = `{
-    "products": *[_type == "product"] { "slug": slug.current, _updatedAt },
-    "categories": *[_type == "category"] { "slug": slug.current, _updatedAt },
-    "posts": *[_type == "post"] { "slug": slug.current, _updatedAt }
+    "products": *[_type == "product" && defined(slug.current)] { "slug": slug.current, _updatedAt },
+    "categories": *[_type == "category" && defined(slug.current)] { "slug": slug.current, _updatedAt },
+    "posts": *[_type == "post" && defined(slug.current)] { "slug": slug.current, _updatedAt }
   }`;
   
   const data = await client.fetch(query);
