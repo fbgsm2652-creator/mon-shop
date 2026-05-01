@@ -51,6 +51,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: new URL(siteUrl),
+    // 🔥 AJOUT DE LA BALISE CANONICAL ICI 🔥
+    alternates: {
+      canonical: '/',
+    },
     title: {
       default: title,
       template: `%s | ${companyName}`
