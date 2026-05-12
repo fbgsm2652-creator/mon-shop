@@ -7,6 +7,15 @@ import { PortableText } from "@portabletext/react";
 import { Metadata } from "next";
 import Link from "next/link";
 
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const slugs = await client.fetch<{ slug: string }[]>(
+    `*[(_type == "product" || _type == "category" || _type == "infoPage") && defined(slug.current)]{ "slug": slug.current }`
+  );
+  return slugs.map((s) => ({ slug: s.slug }));
+}
+
 // --- 1. GÉNÉRATION DES METADATA (SEO DYNAMIQUE) ---
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const params = await props.params;

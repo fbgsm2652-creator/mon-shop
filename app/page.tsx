@@ -4,13 +4,7 @@ import Link from "next/link";
 import { urlFor } from "@/sanity/lib/image";
 import AutoSlider from "@/components/AutoSlider"; 
 
-// Revalidation toutes les 60 secondes
-export const revalidate = 60;
-
-export const metadata = {
-  title: "RENW | L'Expert du Smartphone Reconditionné et Pièces Détachées",
-  description: "Découvrez notre sélection de smartphones reconditionnés Premium garantis 12 mois, testés sur 40 points de contrôle. Pièces détachées d'origine et compatibles.",
-};
+export const revalidate = 3600;
 
 const PlusIcon = ({ className }: { className?: string }) => (
   <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>

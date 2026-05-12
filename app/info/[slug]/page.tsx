@@ -4,25 +4,28 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
 // --- GENERATION DES METADATAS POUR GOOGLE ---
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await props.params;
   const data = await client.fetch(
     `*[_type == "page" && slug.current == $slug][0]{ metaTitle, metaDescription, title }`,
-    { slug: params.slug }
+    { slug }
   );
 
   if (!data) return { title: "Page non trouvée" };
 
   return {
     title: data.metaTitle || data.title,
-    description: data.metaDescription || "Informations complémentaires sur RENW Algérie.",
+    description: data.metaDescription || "Informations complémentaires sur RENW.",
+    alternates: { canonical: `https://renw.fr/info/${slug}` },
   };
 }
 
 // --- AFFICHAGE DE LA PAGE ---
-export default async function StaticPage({ params }: { params: { slug: string } }) {
+export default async function StaticPage(props: { params: Promise<{ slug: string }> }) {
+  const { slug } = await props.params;
   const data = await client.fetch(
     `*[_type == "page" && slug.current == $slug][0]`,
-    { slug: params.slug }
+    { slug }
   );
 
   if (!data) notFound();
@@ -30,7 +33,7 @@ export default async function StaticPage({ params }: { params: { slug: string } 
   const interFont = { fontFamily: '"Inter", sans-serif' };
 
   return (
-    <main style={interFont} className="max-w-4xl mx-auto px-6 py-24 min-h-screen text-[#111111]">
+    <main style={interFont} className="max-w-4xl mx-auto px-6 py-24 min-h-screen text-[#111111] font-['Segoe_UI',Roboto,Helvetica,Arial,sans-serif]">
       <div className="mb-16">
         <h1 className="text-4xl md:text-5xl font-[1000] uppercase tracking-[ -0.05em] italic">
           {data.title}

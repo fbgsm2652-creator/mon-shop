@@ -9,13 +9,11 @@ import { client } from './client';
 // On récupère le token de lecture (s'il existe)
 const token = process.env.SANITY_API_READ_TOKEN;
 
-export const { sanityFetch, SanityLive } = defineLive({ 
-  client: client.withConfig({ 
+export const { sanityFetch, SanityLive } = defineLive({
+  client: client.withConfig({
     apiVersion: '2024-01-01',
-    useCdn: false, // Obligatoire pour le Live (données fraîches, pas de cache)
+    useCdn: false, // Le Live API nécessite des données fraîches, pas de CDN
   }),
-  // LA CORRECTION MAGIQUE : 
-  // Si 'token' n'existe pas, on passe 'false'. L'avertissement disparaît instantanément !
-  serverToken: token || false,
-  browserToken: token || false,
+  serverToken: token || undefined,
+  browserToken: token || undefined,
 });

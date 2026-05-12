@@ -6,21 +6,31 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const slugs = await client.fetch<{ slug: string }[]>(
+    `*[_type == "post" && defined(slug.current)]{ "slug": slug.current }`
+  );
+  return slugs.map((s) => ({ slug: s.slug }));
+}
+
 // --- 1. METADATA DYNAMIQUES (SEO) ---
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const resolvedParams = await params;
   const slug = resolvedParams.slug;
-  
+
   const post = await client.fetch(
     `*[_type == "post" && slug.current == $slug][0]{title, excerpt, "ogImage": mainImage.asset->url}`,
-    { slug } 
+    { slug }
   );
-  
+
   if (!post) return { title: "Article non trouvé | RENW" };
 
   return {
     title: `${post.title} | Le Mag RENW`,
     description: post.excerpt || "Conseils et expertise sur la technologie reconditionnée par RENW.",
+    alternates: { canonical: `https://renw.fr/blog/post/${slug}` },
     openGraph: {
       title: post.title,
       description: post.excerpt,
