@@ -47,11 +47,13 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
     keywordsArray = data.metaKeywords.split(',').map((k: string) => k.trim()); // Sécurité au cas où
   }
 
+  const metaSiteUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://renw.fr";
+
   return {
     title: displayTitle,
     description: displayDesc,
     keywords: keywordsArray,
-    alternates: { canonical: `https://renw.fr/${slug}` },
+    alternates: { canonical: `${metaSiteUrl}/${slug}` },
     robots: {
       index: true,
       follow: true,
@@ -66,9 +68,9 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
     openGraph: {
       title: displayTitle,
       description: displayDesc,
-      url: `https://renw.fr/${slug}`,
+      url: `${metaSiteUrl}/${slug}`,
       siteName: "RENW",
-      images: data.ogImage ? [{ url: data.ogImage }] : [],
+      images: data.ogImage ? [{ url: data.ogImage, width: 1200, height: 630 }] : [],
       type: "website",
     },
   };
@@ -87,6 +89,8 @@ const infoPageComponents = {
     number: ({ children }: any) => <ol className="list-decimal pl-6 mb-6 space-y-2 text-[15px] md:text-[16px] leading-[1.8] text-gray-600 font-medium">{children}</ol>,
   },
 };
+
+const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://renw.fr";
 
 // --- 3. LE COMPOSANT DYNAMIQUE ---
 export default async function DynamicPage(props: { params: Promise<{ slug: string }> }) {
@@ -134,7 +138,7 @@ export default async function DynamicPage(props: { params: Promise<{ slug: strin
       "relatedProducts": relatedProducts[]->{
         _id,
         name,
-        "slug": slug,
+        "slug": slug.current,
         "mainImage": coalesce(mainImage, images[0])
       },
 
@@ -168,18 +172,18 @@ export default async function DynamicPage(props: { params: Promise<{ slug: strin
 
   // --- FIL D'ARIANE (BREADCRUMB) OPTIMISÉ ---
   const breadcrumbList = [
-    { position: 1, name: "Accueil", item: "https://renw.fr" },
+    { position: 1, name: "Accueil", item: siteUrl },
   ];
 
   if (data._type === "product") {
     if (data.category) {
-      breadcrumbList.push({ position: 2, name: data.category.title, item: `https://renw.fr/${data.category.slug}` });
+      breadcrumbList.push({ position: 2, name: data.category.title, item: `${siteUrl}/${data.category.slug}` });
     }
-    breadcrumbList.push({ position: data.category ? 3 : 2, name: data.name || data.title, item: `https://renw.fr/${slug}` });
+    breadcrumbList.push({ position: data.category ? 3 : 2, name: data.name || data.title, item: `${siteUrl}/${slug}` });
   } else if (data._type === "category") {
-    breadcrumbList.push({ position: 2, name: data.title || data.name, item: `https://renw.fr/${slug}` });
+    breadcrumbList.push({ position: 2, name: data.title || data.name, item: `${siteUrl}/${slug}` });
   } else if (data._type === "infoPage") {
-    breadcrumbList.push({ position: 2, name: data.title, item: `https://renw.fr/${slug}` });
+    breadcrumbList.push({ position: 2, name: data.title, item: `${siteUrl}/${slug}` });
   }
 
   const siteFont = { fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" };

@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${post.title} | Le Mag RENW`,
     description: post.excerpt || "Conseils et expertise sur la technologie reconditionnée par RENW.",
-    alternates: { canonical: `https://renw.fr/blog/post/${slug}` },
+    alternates: { canonical: `${process.env.NEXT_PUBLIC_BASE_URL || "https://renw.fr"}/blog/post/${slug}` },
     openGraph: {
       title: post.title,
       description: post.excerpt,
@@ -104,7 +104,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             "image": post.mainImage ? urlFor(post.mainImage).url() : "",
             "datePublished": post.publishedAt,
             "author": { "@type": "Organization", "name": "RENW" },
-            "publisher": { "@type": "Organization", "name": "RENW", "logo": { "@type": "ImageObject", "url": "https://renw.fr/logo.png" } }
+            "publisher": { "@type": "Organization", "name": "RENW", "logo": { "@type": "ImageObject", "url": `${process.env.NEXT_PUBLIC_BASE_URL || "https://renw.fr"}/logo.png` } }
           })
         }}
       />

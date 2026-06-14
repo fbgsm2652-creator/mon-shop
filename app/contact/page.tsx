@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Nous Contacter",
   description: "Une question sur un produit reconditionné, une pièce détachée ou votre commande ? L'équipe RENW est à votre disposition. Contactez-nous dès maintenant.",
   alternates: {
-    canonical: "https://renw.fr/contact",
+    canonical: `${process.env.NEXT_PUBLIC_BASE_URL || "https://renw.fr"}/contact`,
   }
 };
 

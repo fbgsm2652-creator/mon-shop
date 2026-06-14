@@ -44,7 +44,18 @@ export async function POST(request: Request) {
       body: JSON.stringify(zenPayload)
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("ZEN API error:", response.status, errorText);
+      return NextResponse.json({ error: "Refus du prestataire de paiement" }, { status: 502 });
+    }
+
     const zenData = await response.json();
+
+    if (!zenData?.redirectUrl) {
+      console.error("ZEN API: réponse sans redirectUrl", zenData);
+      return NextResponse.json({ error: "Réponse invalide du prestataire de paiement" }, { status: 502 });
+    }
 
     // On renvoie l'URL de redirection au frontend
     return NextResponse.json({ redirectUrl: zenData.redirectUrl });

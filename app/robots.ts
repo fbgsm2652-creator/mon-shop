@@ -16,6 +16,6 @@ export default function robots(): MetadataRoute.Robots {
         '/mon-compte/' // Espace client privé
       ],
     },
-    sitemap: 'https://renw.fr/sitemap.xml',
+    sitemap: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://renw.fr'}/sitemap.xml`,
   };
 }

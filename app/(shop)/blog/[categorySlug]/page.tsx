@@ -50,8 +50,8 @@ export default async function BlogCategoryPage({ params }: { params: Promise<{ c
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://renw.fr" },
-              { "@type": "ListItem", "position": 2, "name": "Le Mag", "item": "https://renw.fr/blog" },
+              { "@type": "ListItem", "position": 1, "name": "Accueil", "item": process.env.NEXT_PUBLIC_BASE_URL || "https://renw.fr" },
+              { "@type": "ListItem", "position": 2, "name": "Le Mag", "item": `${process.env.NEXT_PUBLIC_BASE_URL || "https://renw.fr"}/blog` },
               { "@type": "ListItem", "position": 3, "name": data.category.title }
             ]
           })

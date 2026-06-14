@@ -73,7 +73,7 @@ export default function CategoryPageDisplay({ category }: { category: any }) {
   const [isSortOpen, setIsSortOpen] = useState(false);
   
   const categoryFaqs = category.faq || category.faqs || [];
-  const baseUrl = "https://renw.fr";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://renw.fr";
 
   // Filtres
   const [sortOrder, setSortOrder] = useState(searchParams.get('sort') || 'relevance');

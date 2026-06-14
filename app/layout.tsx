@@ -70,7 +70,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: companyName,
       locale: "fr_FR",
       type: "website",
-      images: [{ url: "/default-og.png" }],
+      images: [{ url: "/default-og.png", width: 1200, height: 630, alt: `${companyName} - Expertise Tech Reconditionné` }],
     },
   };
 }

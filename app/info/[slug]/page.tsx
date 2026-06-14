@@ -13,10 +13,12 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
 
   if (!data) return { title: "Page non trouvée" };
 
+  const infoSiteUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://renw.fr";
+
   return {
     title: data.metaTitle || data.title,
     description: data.metaDescription || "Informations complémentaires sur RENW.",
-    alternates: { canonical: `https://renw.fr/info/${slug}` },
+    alternates: { canonical: `${infoSiteUrl}/info/${slug}` },
   };
 }
 
@@ -30,10 +32,10 @@ export default async function StaticPage(props: { params: Promise<{ slug: string
 
   if (!data) notFound();
 
-  const interFont = { fontFamily: '"Inter", sans-serif' };
+  const siteFont = { fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" };
 
   return (
-    <main style={interFont} className="max-w-4xl mx-auto px-6 py-24 min-h-screen text-[#111111] font-['Segoe_UI',Roboto,Helvetica,Arial,sans-serif]">
+    <main style={siteFont} className="max-w-4xl mx-auto px-6 py-24 min-h-screen text-[#111111]">
       <div className="mb-16">
         <h1 className="text-4xl md:text-5xl font-[1000] uppercase tracking-[ -0.05em] italic">
           {data.title}

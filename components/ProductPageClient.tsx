@@ -91,10 +91,11 @@ export default function ProductPageClient({ product }: { product: any }) {
   const bundlePrice = unitPrice + totalCrossSellPrice;
 
   const siteFont = { fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif" };
-  
+
   // 🔥 CORRECTION SEO 1 & 2 : Intégration des bons Slugs et de la FAQ dynamique 🔥
   const productSlug = product.slug?.current || product.slug || "";
   const categorySlug = product.category?.slug?.current || product.category?.slug || "";
+  const productSiteUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://renw.fr";
 
   const structuredData: any = {
     "@context": "https://schema.org",
@@ -102,9 +103,9 @@ export default function ProductPageClient({ product }: { product: any }) {
       {
         "@type": "BreadcrumbList",
         "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://renw.fr" },
-          ...(product.category ? [{ "@type": "ListItem", "position": 2, "name": product.category.title || product.category.name, "item": `https://renw.fr/${categorySlug}` }] : []),
-          { "@type": "ListItem", "position": product.category ? 3 : 2, "name": product.name, "item": `https://renw.fr/${productSlug}` }
+          { "@type": "ListItem", "position": 1, "name": "Accueil", "item": productSiteUrl },
+          ...(product.category ? [{ "@type": "ListItem", "position": 2, "name": product.category.title || product.category.name, "item": `${productSiteUrl}/${categorySlug}` }] : []),
+          { "@type": "ListItem", "position": product.category ? 3 : 2, "name": product.name, "item": `${productSiteUrl}/${productSlug}` }
         ]
       },
       {
@@ -118,7 +119,7 @@ export default function ProductPageClient({ product }: { product: any }) {
         "category": product.category?.title || product.category?.name || "Électronique",
         "offers": {
           "@type": "Offer",
-          "url": `https://renw.fr/${productSlug}`,
+          "url": `${productSiteUrl}/${productSlug}`,
           "price": unitPrice,
           "priceCurrency": "EUR",
           "availability": "https://schema.org/InStock",

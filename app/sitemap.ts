@@ -5,7 +5,7 @@ import { client } from '@/sanity/lib/client';
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://renw.fr';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://renw.fr';
 
   const query = `{
     "products": *[_type == "product" && defined(slug.current)] { "slug": slug.current, _updatedAt },

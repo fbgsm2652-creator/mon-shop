@@ -24,7 +24,7 @@ export default function CheckoutEntryPage() {
                 Pas besoin de compte. Vous pourrez en créer un à la fin pour suivre votre colis.
               </p>
             </div>
-            <Link href="/checkout/shipping" className="w-full bg-[#111111] text-white py-5 rounded-full font-bold uppercase tracking-widest text-[11px] text-center hover:bg-blue-600 transition-all">
+            <Link href="/checkout/shipping" className="w-full bg-[#111111] text-white py-5 rounded-full font-bold uppercase tracking-widest text-[11px] text-center hover:bg-[#0066CC] transition-all">
               Continuer en invité
             </Link>
           </div>

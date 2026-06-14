@@ -50,16 +50,18 @@ export default async function HomePage() {
     }
   ];
 
+  const homeSiteUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://renw.fr";
+
   const seoSchema = [
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "RENW France",
       "alternateName": "RENW Technology",
-      "url": "https://renw.fr",
+      "url": homeSiteUrl,
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://renw.fr/search?q={search_term_string}",
+        "target": `${homeSiteUrl}/search?q={search_term_string}`,
         "query-input": "required name=search_term_string"
       }
     },
@@ -67,8 +69,8 @@ export default async function HomePage() {
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "RENW",
-      "url": "https://renw.fr",
-      "logo": "https://renw.fr/logo.png",
+      "url": homeSiteUrl,
+      "logo": `${homeSiteUrl}/logo.png`,
       "description": "Expert français en smartphones reconditionnés et pièces détachées de haute qualité.",
       "address": {
         "@type": "PostalAddress",
